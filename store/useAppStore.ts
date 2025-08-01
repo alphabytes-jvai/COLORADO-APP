@@ -121,6 +121,8 @@ interface AppState {
   // Notifications
   notifications: Notification[];
   unreadNotificationCount: number;
+  // Favorites
+  favoriteItems: string[];
   // Authentication flow
   forgotPasswordEmail: string | null;
   signUpEmail: string | null;
@@ -146,6 +148,11 @@ interface AppState {
   markAllNotificationsAsRead: () => void;
   removeNotification: (id: string) => void;
   clearAllNotifications: () => void;
+  // Favorite Actions
+  addToFavorites: (itemId: string) => void;
+  removeFromFavorites: (itemId: string) => void;
+  toggleFavorite: (itemId: string) => void;
+  isFavorite: (itemId: string) => boolean;
   // Authentication flow actions
   setForgotPasswordEmail: (email: string | null) => void;
   setSignUpEmail: (email: string | null) => void;
@@ -187,6 +194,7 @@ export const useAppStore = create<AppState>()(
       hasSeenOnboarding: false,
       notifications: [],
       unreadNotificationCount: 0,
+      favoriteItems: [],
       forgotPasswordEmail: null,
       signUpEmail: null,
       otpVerified: false,
@@ -331,6 +339,36 @@ export const useAppStore = create<AppState>()(
         });
       },
 
+      // Favorite Actions
+      addToFavorites: (itemId: string) => {
+        const currentFavorites = get().favoriteItems;
+        if (!currentFavorites.includes(itemId)) {
+          set({
+            favoriteItems: [...currentFavorites, itemId],
+          });
+        }
+      },
+
+      removeFromFavorites: (itemId: string) => {
+        const currentFavorites = get().favoriteItems;
+        set({
+          favoriteItems: currentFavorites.filter(id => id !== itemId),
+        });
+      },
+
+      toggleFavorite: (itemId: string) => {
+        const currentFavorites = get().favoriteItems;
+        if (currentFavorites.includes(itemId)) {
+          get().removeFromFavorites(itemId);
+        } else {
+          get().addToFavorites(itemId);
+        }
+      },
+
+      isFavorite: (itemId: string) => {
+        return get().favoriteItems.includes(itemId);
+      },
+
       // Authentication flow actions
       setForgotPasswordEmail: (email: string | null) => {
         set({ forgotPasswordEmail: email });
@@ -395,6 +433,7 @@ export const useAppStore = create<AppState>()(
         theme: state.theme,
         notifications: state.notifications,
         unreadNotificationCount: state.unreadNotificationCount,
+        favoriteItems: state.favoriteItems,
         settings: state.settings,
         hasSeenOnboarding: state.hasSeenOnboarding,
         // Don't persist loading states, errors, or temporary auth flow data
@@ -414,6 +453,7 @@ export const useAppStore = create<AppState>()(
             ...persistedState,
             settings: defaultSettings,
             unreadNotificationCount: 0,
+            favoriteItems: [],
           };
         }
         if (version === 2) {
@@ -421,6 +461,7 @@ export const useAppStore = create<AppState>()(
             ...persistedState,
             signUpEmail: null,
             otpType: null,
+            favoriteItems: persistedState.favoriteItems || [],
           };
         }
         return persistedState;
@@ -456,6 +497,14 @@ export const useSettings = () =>
   useAppStore((state) => ({
     settings: state.settings,
     updateSettings: state.updateSettings,
+  }));
+export const useFavoritesStore = () =>
+  useAppStore((state) => ({
+    favoriteItems: state.favoriteItems,
+    addToFavorites: state.addToFavorites,
+    removeFromFavorites: state.removeFromFavorites,
+    toggleFavorite: state.toggleFavorite,
+    isFavorite: state.isFavorite,
   }));
 
 // Type exports for external use

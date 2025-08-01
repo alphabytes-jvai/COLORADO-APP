@@ -66,33 +66,53 @@ export default function HomeScreen() {
   const handleCategoryPress = (category: Category) => {
     console.log("Category pressed:", category.name);
     // Navigate to category screen
-    // router.push(`/(main)/category/${category.id}`);
+    router.push("/(main)/explore");
   };
 
   const handleExploreItemPress = (item: ExploreItem) => {
     console.log("Explore item pressed:", item.title);
     // Navigate to explore detail screen
-    // router.push(`/(main)/explore/${item.id}`);
+    router.push({
+      pathname: "/(main)/detail/[id]",
+      params: { 
+        id: item.id,
+        type: "explore",
+        title: item.title,
+        description: item.description || "",
+        location: item.location || "",
+        rating: item.rating?.toString() || "0"
+      }
+    });
   };
 
   const handleRecommendedItemPress = (item: RecommendedItem) => {
     console.log("Recommended item pressed:", item.title);
     // Navigate to recommended detail screen
-    // router.push(`/(main)/recommended/${item.id}`);
+    router.push({
+      pathname: "/(main)/detail/[id]",
+      params: { 
+        id: item.id,
+        type: "recommendation",
+        title: item.title,
+        description: item.description || "",
+        location: item.location || "",
+        dateRange: item.dateRange,
+        rating: item.rating?.toString() || "0",
+        price: item.price?.toString() || "0"
+      }
+    });
   };
 
   const handleHeroSlidePress = (slide: HeroSlide) => {
     console.log("Hero slide pressed:", slide.title);
     // Navigate to slide action URL
-    // if (slide.actionUrl) {
-    //   router.push(slide.actionUrl);
-    // }
+    router.push("/(main)/explore");
   };
 
   const handleRecommendedSeeAll = () => {
     console.log("See all recommended pressed");
     // Navigate to recommended list screen
-    // router.push("/(main)/recommended");
+    router.push("/(main)/recommendations");
   };
 
   const handleSearch = (text: string) => {

@@ -2,7 +2,7 @@
 import { Tabs } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
-import { Home, User, Settings } from "lucide-react-native";
+import { Home, User, Settings, MessageCircle, Star } from "lucide-react-native";
 import { View } from "react-native";
 
 export default function MainLayout() {
@@ -77,11 +77,29 @@ export default function MainLayout() {
         }}
       />
       <Tabs.Screen
-        name='profile'
+        name='ask-ai'
         options={{
-          title: "Profile",
+          title: "Ask AI",
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon Icon={MessageCircle} color={color} size={size} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name='map'
+        options={{
+          title: "Map",
           tabBarIcon: ({ color, size, focused }) => (
             <TabIcon Icon={User} color={color} size={size} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name='favorites'
+        options={{
+          title: "Favorite",
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon Icon={Star} color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -90,13 +108,34 @@ export default function MainLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon
-              Icon={Settings}
-              color={color}
-              size={size}
-              focused={focused}
-            />
+            <TabIcon Icon={Settings} color={color} size={size} focused={focused} />
           ),
+        }}
+      />
+      
+      {/* Hidden screens */}
+      <Tabs.Screen
+        name='recommendations'
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name='explore'
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name='detail'
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name='profile'
+        options={{
+          href: null, // Hide from tab bar
         }}
       />
     </Tabs>
