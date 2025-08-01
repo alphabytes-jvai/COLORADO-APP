@@ -1,5 +1,5 @@
 // app/(main)/detail/[id].tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   View,
   Text,

@@ -175,7 +175,7 @@ export default function HomeScreen() {
           placeholder='Search here'
           value={searchText}
           onChangeText={handleSearch}
-          className='mb-4 bg-white rounded-base'
+          className='mb-4 bg-white rounded-[10px]'
         />
       </View>
 

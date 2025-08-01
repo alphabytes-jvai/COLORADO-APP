@@ -2,7 +2,13 @@
 import { Tabs } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
-import { Chrome as Home, User, Settings, MessageCircle, Star } from "lucide-react-native";
+import {
+  MapPinned,
+  Settings,
+  MessageCircle,
+  Star,
+  House,
+} from "lucide-react-native";
 import { View } from "react-native";
 
 export default function MainLayout() {
@@ -72,7 +78,7 @@ export default function MainLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon Icon={Home} color={color} size={size} focused={focused} />
+            <TabIcon Icon={House} color={color} size={size} focused={focused} />
           ),
         }}
       />
@@ -95,7 +101,12 @@ export default function MainLayout() {
         options={{
           title: "Map",
           tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon Icon={User} color={color} size={size} focused={focused} />
+            <TabIcon
+              Icon={MapPinned}
+              color={color}
+              size={size}
+              focused={focused}
+            />
           ),
         }}
       />
