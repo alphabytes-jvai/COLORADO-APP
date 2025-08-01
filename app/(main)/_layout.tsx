@@ -81,7 +81,12 @@ export default function MainLayout() {
         options={{
           title: "Ask AI",
           tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon Icon={MessageCircle} color={color} size={size} focused={focused} />
+            <TabIcon
+              Icon={MessageCircle}
+              color={color}
+              size={size}
+              focused={focused}
+            />
           ),
         }}
       />
@@ -108,11 +113,16 @@ export default function MainLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon Icon={Settings} color={color} size={size} focused={focused} />
+            <TabIcon
+              Icon={Settings}
+              color={color}
+              size={size}
+              focused={focused}
+            />
           ),
         }}
       />
-      
+
       {/* Hidden screens */}
       <Tabs.Screen
         name='recommendations'
@@ -128,6 +138,12 @@ export default function MainLayout() {
       />
       <Tabs.Screen
         name='detail'
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name='detail/[id]'
         options={{
           href: null, // Hide from tab bar
         }}

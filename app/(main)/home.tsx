@@ -12,6 +12,7 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { useAppStore } from "@/store/useAppStore";
@@ -74,14 +75,14 @@ export default function HomeScreen() {
     // Navigate to explore detail screen
     router.push({
       pathname: "/(main)/detail/[id]",
-      params: { 
+      params: {
         id: item.id,
         type: "explore",
         title: item.title,
         description: item.description || "",
         location: item.location || "",
-        rating: item.rating?.toString() || "0"
-      }
+        rating: item.rating?.toString() || "0",
+      },
     });
   };
 
@@ -90,7 +91,7 @@ export default function HomeScreen() {
     // Navigate to recommended detail screen
     router.push({
       pathname: "/(main)/detail/[id]",
-      params: { 
+      params: {
         id: item.id,
         type: "recommendation",
         title: item.title,
@@ -98,8 +99,8 @@ export default function HomeScreen() {
         location: item.location || "",
         dateRange: item.dateRange,
         rating: item.rating?.toString() || "0",
-        price: item.price?.toString() || "0"
-      }
+        price: item.price?.toString() || "0",
+      },
     });
   };
 
@@ -128,58 +129,58 @@ export default function HomeScreen() {
     Dimensions.get("window");
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className='flex-1 bg-white'>
       {/* Header Background */}
-      <View className="absolute top-0 left-0 right-0">
+      <View className='absolute top-0 left-0 right-0'>
         <ImageBackground
           source={require("@/assets/images/top-cloud.png")}
           style={{
             width: SCREEN_WIDTH,
             height: SCREEN_HEIGHT * 0.35,
           }}
-          resizeMode="cover"
+          resizeMode='cover'
         />
       </View>
 
       {/* Header */}
-      <View className="px-5 py-3 z-10">
-        <View className="flex-row items-center justify-between mb-4">
-          <View className="flex-1">
-            <Text className="text-sm text-gray-600 mb-1">
+      <View className='px-5 py-3 z-10'>
+        <View className='flex-row items-center justify-between mb-4'>
+          <View className='flex-1'>
+            <Text className='text-sm text-gray-600 mb-1'>
               <TranslatedText>
                 {user ? `Welcome, ${user.name}!` : "Welcome, Daniel!"}
               </TranslatedText>
             </Text>
-            <Text className="text-2xl font-bold text-black">
+            <Text className='text-2xl font-bold text-black'>
               <TranslatedText>Explore Colorado</TranslatedText>
             </Text>
           </View>
-          <View className="flex-row items-center space-x-3">
-            <View className="w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2">
+          <View className='flex-row items-center space-x-3'>
+            <View className='w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'>
               <Image
                 source={require("@/assets/images/us-flag.png")}
-                className="w-5 h-5"
-                resizeMode="contain"
+                className='w-5 h-5'
+                resizeMode='contain'
               />
             </View>
-            <TouchableOpacity className="relative w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2">
-              <Bell size={20} color="#333" />
-              <View className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+            <TouchableOpacity className='relative w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'>
+              <Bell size={20} color='#333' />
+              <View className='absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full' />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Search Bar */}
         <SearchInput
-          placeholder="Search here"
+          placeholder='Search here'
           value={searchText}
           onChangeText={handleSearch}
-          className="mb-4 bg-white rounded-base"
+          className='mb-4 bg-white rounded-base'
         />
       </View>
 
       <ScrollView
-        className="flex-1"
+        className='flex-1'
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -198,20 +199,20 @@ export default function HomeScreen() {
         <DynamicCategoriesSection
           categories={categories}
           categoryShow={12}
-          title="Categories"
+          title='Categories'
           onCategoryPress={handleCategoryPress}
           showTitle={true}
           columns={5}
-          showMoreText="Show More"
-          showLessText="Show Less"
-          showMoreIcon="⬇️"
-          showLessIcon="⬆️"
+          showMoreText='Show More'
+          showLessText='Show Less'
+          showMoreIcon='⬇️'
+          showLessIcon='⬆️'
         />
 
         {/* Explore Section */}
         <ExploreSection
           items={exploreItems}
-          title="Explore"
+          title='Explore'
           onItemPress={handleExploreItemPress}
           showTitle={true}
           columns={2}
@@ -220,7 +221,7 @@ export default function HomeScreen() {
         {/* Recommended Section */}
         <RecommendedSection
           items={recommendedItems}
-          title="Recommended"
+          title='Recommended'
           onItemPress={handleRecommendedItemPress}
           showTitle={true}
           showSeeAll={true}
@@ -228,7 +229,7 @@ export default function HomeScreen() {
         />
 
         {/* Bottom Padding for Tab Bar */}
-        <View className="h-20" />
+        <View className='h-20' />
       </ScrollView>
     </SafeAreaView>
   );

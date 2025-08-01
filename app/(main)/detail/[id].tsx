@@ -14,9 +14,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { Button } from "@/components/ui/Button";
-import { 
-  ChevronLeft, 
-  Star, 
+import {
+  ChevronLeft,
+  Star,
   Calendar,
   MapPin,
   Share2,
@@ -24,7 +24,7 @@ import {
   Instagram,
   Twitter,
   Youtube,
-  Linkedin
+  Linkedin,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -64,11 +64,11 @@ Netus porta sit eu orci in lectus. Quam dolor vestibulum tellus neque tellus sem
     price: 0,
     socialLinks: {
       facebook: "https://facebook.com",
-      instagram: "https://instagram.com", 
+      instagram: "https://instagram.com",
       twitter: "https://twitter.com",
       youtube: "https://youtube.com",
-      linkedin: "https://linkedin.com"
-    }
+      linkedin: "https://linkedin.com",
+    },
   };
 };
 
@@ -76,7 +76,7 @@ export default function DetailScreen() {
   const params = useLocalSearchParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
-  
+
   const detailData = getDetailData(params.id as string);
 
   const handleShare = async () => {
@@ -100,13 +100,15 @@ export default function DetailScreen() {
   };
 
   const renderImageSlider = () => (
-    <View className="relative">
+    <View className='relative'>
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={(event) => {
-          const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+          const index = Math.round(
+            event.nativeEvent.contentOffset.x / SCREEN_WIDTH
+          );
           setCurrentImageIndex(index);
         }}
       >
@@ -115,7 +117,7 @@ export default function DetailScreen() {
             key={index}
             source={image}
             style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.4 }}
-            resizeMode="cover"
+            resizeMode='cover'
           />
         ))}
       </ScrollView>
@@ -123,31 +125,31 @@ export default function DetailScreen() {
       {/* Gradient overlay */}
       <LinearGradient
         colors={["transparent", "rgba(0,0,0,0.3)"]}
-        className="absolute bottom-0 left-0 right-0 h-20"
+        className='absolute bottom-0 left-0 right-0 h-20'
       />
 
       {/* Back button */}
       <TouchableOpacity
         onPress={() => router.back()}
-        className="absolute top-12 left-4 w-10 h-10 bg-white/20 rounded-full items-center justify-center"
+        className='absolute top-12 left-4 w-10 h-10 bg-white/20 rounded-full items-center justify-center'
       >
-        <ChevronLeft size={24} color="white" />
+        <ChevronLeft size={24} color='white' />
       </TouchableOpacity>
 
       {/* Favorite button */}
       <TouchableOpacity
         onPress={() => setIsFavorite(!isFavorite)}
-        className="absolute top-12 right-4 w-10 h-10 bg-white/20 rounded-full items-center justify-center"
+        className='absolute top-12 right-4 w-10 h-10 bg-white/20 rounded-full items-center justify-center'
       >
-        <Star 
-          size={24} 
+        <Star
+          size={24}
           color={isFavorite ? "#FFD700" : "white"}
           fill={isFavorite ? "#FFD700" : "transparent"}
         />
       </TouchableOpacity>
 
       {/* Image indicators */}
-      <View className="absolute bottom-4 left-0 right-0 flex-row justify-center">
+      <View className='absolute bottom-4 left-0 right-0 flex-row justify-center'>
         {detailData.images.map((_, index) => (
           <View
             key={index}
@@ -161,72 +163,72 @@ export default function DetailScreen() {
   );
 
   const renderSocialLinks = () => (
-    <View className="mb-6">
-      <Text className="text-lg font-semibold text-black mb-3">
+    <View className='mb-6'>
+      <Text className='text-lg font-semibold text-black mb-3'>
         <TranslatedText>Socials</TranslatedText>
       </Text>
-      <View className="flex-row justify-between px-4">
+      <View className='flex-row justify-between px-4'>
         <TouchableOpacity
           onPress={() => handleSocialPress(detailData.socialLinks.facebook)}
-          className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center"
+          className='w-12 h-12 bg-blue-600 rounded-full items-center justify-center'
         >
-          <Facebook size={24} color="white" />
+          <Facebook size={24} color='white' />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleSocialPress(detailData.socialLinks.instagram)}
-          className="w-12 h-12 bg-pink-500 rounded-full items-center justify-center"
+          className='w-12 h-12 bg-pink-500 rounded-full items-center justify-center'
         >
-          <Instagram size={24} color="white" />
+          <Instagram size={24} color='white' />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleSocialPress(detailData.socialLinks.twitter)}
-          className="w-12 h-12 bg-blue-400 rounded-full items-center justify-center"
+          className='w-12 h-12 bg-blue-400 rounded-full items-center justify-center'
         >
-          <Twitter size={24} color="white" />
+          <Twitter size={24} color='white' />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleSocialPress(detailData.socialLinks.youtube)}
-          className="w-12 h-12 bg-red-600 rounded-full items-center justify-center"
+          className='w-12 h-12 bg-red-600 rounded-full items-center justify-center'
         >
-          <Youtube size={24} color="white" />
+          <Youtube size={24} color='white' />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleSocialPress(detailData.socialLinks.linkedin)}
-          className="w-12 h-12 bg-blue-700 rounded-full items-center justify-center"
+          className='w-12 h-12 bg-blue-700 rounded-full items-center justify-center'
         >
-          <Linkedin size={24} color="white" />
+          <Linkedin size={24} color='white' />
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    <SafeAreaView className='flex-1 bg-white'>
+      <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
         {/* Image Slider */}
         {renderImageSlider()}
 
         {/* Content */}
-        <View className="px-5 py-6">
+        <View className='px-5 py-6'>
           {/* Title and Rating */}
-          <View className="mb-4">
-            <Text className="text-2xl font-bold text-black mb-2 leading-tight">
+          <View className='mb-4'>
+            <Text className='text-2xl font-bold text-black mb-2 leading-tight'>
               <TranslatedText>{detailData.title}</TranslatedText>
             </Text>
-            <Text className="text-gray-600 text-base mb-3">
+            <Text className='text-gray-600 text-base mb-3'>
               <TranslatedText>{detailData.subtitle}</TranslatedText>
             </Text>
-            
+
             {/* Meta info */}
-            <View className="flex-row items-center justify-between mb-4">
-              <View className="flex-row items-center">
-                <Star size={16} color="#FFD700" fill="#FFD700" />
-                <Text className="text-gray-700 ml-1 font-medium">
+            <View className='flex-row items-center justify-between mb-4'>
+              <View className='flex-row items-center'>
+                <Star size={16} color='#FFD700' fill='#FFD700' />
+                <Text className='text-gray-700 ml-1 font-medium'>
                   {detailData.rating}
                 </Text>
               </View>
               <TouchableOpacity onPress={handleShare}>
-                <Share2 size={20} color="#666" />
+                <Share2 size={20} color='#666' />
               </TouchableOpacity>
             </View>
           </View>
@@ -235,20 +237,20 @@ export default function DetailScreen() {
           {renderSocialLinks()}
 
           {/* Description */}
-          <View className="mb-6">
-            <Text className="text-lg font-semibold text-black mb-3">
+          <View className='mb-6'>
+            <Text className='text-lg font-semibold text-black mb-3'>
               <TranslatedText>Description</TranslatedText>
             </Text>
-            <Text className="text-gray-700 text-base leading-6">
+            <Text className='text-gray-700 text-base leading-6'>
               <TranslatedText>{detailData.description}</TranslatedText>
             </Text>
           </View>
 
           {/* Date */}
-          <View className="mb-6">
-            <View className="flex-row items-center">
-              <Calendar size={16} color="#666" />
-              <Text className="text-gray-600 ml-2">
+          <View className='mb-6'>
+            <View className='flex-row items-center'>
+              <Calendar size={16} color='#666' />
+              <Text className='text-gray-600 ml-2'>
                 <TranslatedText>{detailData.date}</TranslatedText>
               </Text>
             </View>
@@ -257,15 +259,15 @@ export default function DetailScreen() {
       </ScrollView>
 
       {/* Bottom Action Button */}
-      <View className="px-5 pb-6 pt-4 bg-white border-t border-gray-100">
+      <View className='px-5 pb-6 pt-4 bg-white border-t border-gray-100'>
         <Button
           onPress={handleGetDirections}
-          className="w-full bg-primary"
-          size="lg"
-          textClassName="!text-black font-semibold"
+          className='w-full bg-primary'
+          size='lg'
+          textClassName='!text-black font-semibold'
         >
-          <MapPin size={20} color="black" />
-          <Text className="ml-2 text-black font-semibold">
+          <MapPin size={20} color='black' />
+          <Text className='ml-2 text-black font-semibold'>
             <TranslatedText>Get Direction</TranslatedText>
           </Text>
         </Button>
