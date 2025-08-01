@@ -2,7 +2,7 @@
 import { Tabs } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
-import { Home, User, Settings, MessageCircle, Star } from "lucide-react-native";
+import { Chrome as Home, User, Settings, MessageCircle, Star } from "lucide-react-native";
 import { View } from "react-native";
 
 export default function MainLayout() {
