@@ -8,13 +8,14 @@ import { Platform } from "react-native";
 const storage = {
   getItem: async (name: string): Promise<string | null> => {
     try {
-      if (
-        Platform.OS === "web" &&
-        typeof window !== "undefined" &&
-        window.localStorage
-      ) {
-        return localStorage.getItem(name);
+      if (Platform.OS === "web") {
+        // For web platform, use localStorage
+        if (typeof window !== "undefined" && window.localStorage) {
+          return localStorage.getItem(name);
+        }
+        return null;
       }
+      // For native platforms, use AsyncStorage
       return await AsyncStorage.getItem(name);
     } catch (error) {
       console.error(`Error getting item ${name}:`, error);
@@ -23,13 +24,13 @@ const storage = {
   },
   setItem: async (name: string, value: string): Promise<void> => {
     try {
-      if (
-        Platform.OS === "web" &&
-        typeof window !== "undefined" &&
-        window.localStorage
-      ) {
-        localStorage.setItem(name, value);
+      if (Platform.OS === "web") {
+        // For web platform, use localStorage
+        if (typeof window !== "undefined" && window.localStorage) {
+          localStorage.setItem(name, value);
+        }
       } else {
+        // For native platforms, use AsyncStorage
         await AsyncStorage.setItem(name, value);
       }
     } catch (error) {
@@ -38,13 +39,13 @@ const storage = {
   },
   removeItem: async (name: string): Promise<void> => {
     try {
-      if (
-        Platform.OS === "web" &&
-        typeof window !== "undefined" &&
-        window.localStorage
-      ) {
-        localStorage.removeItem(name);
+      if (Platform.OS === "web") {
+        // For web platform, use localStorage
+        if (typeof window !== "undefined" && window.localStorage) {
+          localStorage.removeItem(name);
+        }
       } else {
+        // For native platforms, use AsyncStorage
         await AsyncStorage.removeItem(name);
       }
     } catch (error) {
@@ -352,7 +353,7 @@ export const useAppStore = create<AppState>()(
       removeFromFavorites: (itemId: string) => {
         const currentFavorites = get().favoriteItems;
         set({
-          favoriteItems: currentFavorites.filter(id => id !== itemId),
+          favoriteItems: currentFavorites.filter((id) => id !== itemId),
         });
       },
 
