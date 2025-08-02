@@ -138,31 +138,25 @@ export default function MainLayout() {
       <Tabs.Screen
         name='recommendations'
         options={{
-          href: null, // Hide from tab bar
+          href: null, 
         }}
       />
       <Tabs.Screen
         name='explore'
         options={{
-          href: null, // Hide from tab bar
-        }}
-      />
-      <Tabs.Screen
-        name='detail'
-        options={{
-          href: null, // Hide from tab bar
+          href: null, 
         }}
       />
       <Tabs.Screen
         name='detail/[id]'
         options={{
-          href: null, // Hide from tab bar
+          href: null, 
         }}
       />
       <Tabs.Screen
         name='profile'
         options={{
-          href: null, // Hide from tab bar
+          href: null,
         }}
       />
     </Tabs>
