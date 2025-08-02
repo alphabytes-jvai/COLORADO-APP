@@ -17,16 +17,23 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.descubrelocolorado.app",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "config": {
+        "googleMapsApiKey": "AIzaSyDEDGrZAJbXKFLXIeBTZ4OG_ykFISytlMw"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#FFFFFF",
-        "statusBarBackgroundColor": "#FFFFFF"
+        "backgroundColor": "#FFFFFF"
       },
       "package": "com.descubrelocolorado.app",
-      "versionCode": 1
+      "versionCode": 1,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDEDGrZAJbXKFLXIeBTZ4OG_ykFISytlMw"
+        }
+      }
     },
     "web": {
       "bundler": "metro",

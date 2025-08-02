@@ -11,6 +11,7 @@ interface NotificationPermissionState {
 }
 
 const PERMISSION_REQUESTED_KEY = "notification_permission_requested";
+const PERMISSION_STATUS_KEY = "notification_permission_status";
 
 export const useNotificationPermissions = (): NotificationPermissionState => {
   const [hasPermission, setHasPermission] = useState(false);
@@ -23,7 +24,7 @@ export const useNotificationPermissions = (): NotificationPermissionState => {
   const checkPermissionStatus = async () => {
     try {
       setIsLoading(true);
-      
+
       if (Platform.OS === "web") {
         // Web notification permission
         if ("Notification" in window) {
@@ -33,11 +34,11 @@ export const useNotificationPermissions = (): NotificationPermissionState => {
           setHasPermission(false);
         }
       } else {
-        // For React Native, we'll simulate permission check
-        // In a real app, you'd use react-native-permissions or expo-notifications
-        const hasAskedBefore = await AsyncStorage.getItem(PERMISSION_REQUESTED_KEY);
-        if (hasAskedBefore) {
-          // Assume granted for demo purposes
+        // For React Native, check if permission was previously granted
+        const permissionStatus = await AsyncStorage.getItem(
+          PERMISSION_STATUS_KEY
+        );
+        if (permissionStatus === "granted") {
           setHasPermission(true);
         } else {
           setHasPermission(false);
@@ -55,11 +56,31 @@ export const useNotificationPermissions = (): NotificationPermissionState => {
     try {
       setIsLoading(true);
 
+      // Check if permission was already requested
+      const hasAskedBefore = await AsyncStorage.getItem(
+        PERMISSION_REQUESTED_KEY
+      );
+      if (hasAskedBefore === "true") {
+        // Don't ask again, just return current status
+        const permissionStatus = await AsyncStorage.getItem(
+          PERMISSION_STATUS_KEY
+        );
+        const granted = permissionStatus === "granted";
+        setHasPermission(granted);
+        return granted;
+      }
+
       if (Platform.OS === "web") {
         if ("Notification" in window) {
           const permission = await Notification.requestPermission();
           const granted = permission === "granted";
           setHasPermission(granted);
+          // Mark as requested
+          await AsyncStorage.setItem(PERMISSION_REQUESTED_KEY, "true");
+          await AsyncStorage.setItem(
+            PERMISSION_STATUS_KEY,
+            granted ? "granted" : "denied"
+          );
           return granted;
         }
         return false;
@@ -73,7 +94,9 @@ export const useNotificationPermissions = (): NotificationPermissionState => {
               {
                 text: "Not Now",
                 style: "cancel",
-                onPress: () => {
+                onPress: async () => {
+                  await AsyncStorage.setItem(PERMISSION_REQUESTED_KEY, "true");
+                  await AsyncStorage.setItem(PERMISSION_STATUS_KEY, "denied");
                   setHasPermission(false);
                   resolve(false);
                 },
@@ -82,6 +105,7 @@ export const useNotificationPermissions = (): NotificationPermissionState => {
                 text: "Allow",
                 onPress: async () => {
                   await AsyncStorage.setItem(PERMISSION_REQUESTED_KEY, "true");
+                  await AsyncStorage.setItem(PERMISSION_STATUS_KEY, "granted");
                   setHasPermission(true);
                   resolve(true);
                 },

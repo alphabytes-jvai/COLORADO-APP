@@ -81,6 +81,8 @@ export interface ExploreSectionProps {
   showTitle?: boolean;
   columns?: number;
   containerClassName?: string;
+  showSeeAll?: boolean;
+  onSeeAllExplore?: () => void;
 }
 
 export interface RecommendedSectionProps {

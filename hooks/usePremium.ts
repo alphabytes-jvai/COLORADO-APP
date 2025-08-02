@@ -36,8 +36,10 @@ const STORAGE_KEYS = {
 
 export const usePremium = (): UsePremiumReturn => {
   const { user } = useAppStore();
-  const [isPremium, setIsPremium] = useState(false);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<"free" | "trial" | "premium">("free");
+  const [isPremium, setIsPremium] = useState(true);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<
+    "free" | "trial" | "premium"
+  >("trial");
   const [trialDaysLeft, setTrialDaysLeft] = useState(0);
   const [featureUsage, setFeatureUsage] = useState<Record<string, PremiumFeature>>({});
 

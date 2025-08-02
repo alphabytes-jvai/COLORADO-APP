@@ -10,6 +10,7 @@ import {
   Dimensions,
   ImageBackground,
   Image,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -68,8 +69,15 @@ export default function HomeScreen() {
 
   const handleCategoryPress = (category: Category) => {
     console.log("Category pressed:", category.name);
-    // Navigate to category screen
-    router.push("/(main)/explore");
+    // Navigate to explore screen with category filter
+    router.push({
+      pathname: "/(main)/explore",
+      params: {
+        category: category.name.toLowerCase(),
+        categoryId: category.id,
+        categoryName: category.name,
+      },
+    });
   };
 
   const handleExploreItemPress = (item: ExploreItem) => {
@@ -117,125 +125,146 @@ export default function HomeScreen() {
     // Navigate to recommended list screen
     router.push("/(main)/recommendations");
   };
-
-  const handleSearch = (text: string) => {
-    setSearchText(text);
-    setShowSearchScreen(true);
+  const handleExploreSeeAll = () => {
+    console.log("See all recommended pressed");
+    // Navigate to recommended list screen
+    router.push("/(main)/explore");
   };
 
   const handleSearchInputPress = () => {
     setShowSearchScreen(true);
   };
 
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+  };
+
+  const handleNotificationPress = () => {
+    router.push("/(main)/map");
+  };
+
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
     Dimensions.get("window");
 
   return (
-    <SafeAreaView className='flex-1 bg-white'>
-      {/* Header Background */}
-      <View className='absolute top-0 left-0 right-0'>
-        <ImageBackground
-          source={require("@/assets/images/top-cloud.png")}
-          style={{
-            width: SCREEN_WIDTH,
-            height: SCREEN_HEIGHT * 0.35,
-          }}
-          resizeMode='cover'
-        />
-      </View>
-
-      {/* Header */}
-      <View className='px-5 py-3 z-10'>
-        <View className='flex-row items-center justify-between mb-4'>
-          <View className='flex-1'>
-            <Text className='text-sm text-gray-600 mb-1'>
-              <TranslatedText>
-                {user ? `Welcome, ${user.name}!` : "Welcome, Daniel!"}
-              </TranslatedText>
-            </Text>
-            <Text className='text-2xl font-bold text-black'>
-              <TranslatedText>Explore Colorado</TranslatedText>
-            </Text>
-          </View>
-          <View className='flex-row items-center space-x-3'>
-            <View className='w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'>
-              <Image
-                source={require("@/assets/images/us-flag.png")}
-                className='w-5 h-5'
-                resizeMode='contain'
-              />
-            </View>
-            <TouchableOpacity className='relative w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'>
-              <Bell size={20} color='#333' />
-              <View className='absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full' />
-            </TouchableOpacity>
-          </View>
+    <>
+      <SafeAreaView className='flex-1 bg-white'>
+        {/* Header Background */}
+        <View className='absolute top-0 left-0 right-0'>
+          <ImageBackground
+            source={require("@/assets/images/top-cloud.png")}
+            style={{
+              width: SCREEN_WIDTH,
+              height: SCREEN_HEIGHT * 0.35,
+            }}
+            resizeMode='cover'
+          />
         </View>
 
-        {/* Search Bar */}
-        <SearchInput
-          placeholder='Search here'
-          value={searchText}
-          onChangeText={handleSearch}
-          onPress={handleSearchInputPress}
-          className='mb-4 bg-white rounded-[10px]'
-        />
-      </View>
+        {/* Header */}
+        <View className='px-5 py-3 z-10'>
+          <View className='flex-row items-center justify-between mb-4'>
+            <View className='flex-1'>
+              <Text className='text-sm text-gray-600 mb-1'>
+                <TranslatedText>
+                  {user ? `Welcome, ${user.name}!` : "Welcome, Nayon!"}
+                </TranslatedText>
+              </Text>
+              <Text className='text-2xl font-bold text-black'>
+                <TranslatedText>Explore Colorado</TranslatedText>
+              </Text>
+            </View>
+            <View className='flex-row items-center space-x-3'>
+              <View className='w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'>
+                <Image
+                  source={require("@/assets/images/us-flag.png")}
+                  className='w-5 h-5'
+                  resizeMode='contain'
+                />
+              </View>
+              <TouchableOpacity
+                onPress={handleNotificationPress}
+                className='relative w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'
+              >
+                <Bell size={20} color='#333' />
+                <View className='absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full' />
+              </TouchableOpacity>
+            </View>
+          </View>
 
-      <ScrollView
-        className='flex-1'
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {/* Hero Slider - Remove px-5 here to make it full width */}
-        <HeroSlider
-          slides={heroSlides}
-          onSlidePress={handleHeroSlidePress}
-          autoPlay={true}
-          autoPlayInterval={5000}
-          showIndicators={true}
-        />
+          {/* Search Bar */}
+          <SearchInput
+            placeholder='Search here'
+            value={searchText}
+            onChangeText={handleSearchChange}
+            onPress={handleSearchInputPress}
+            className='mb-4 bg-white'
+          />
+        </View>
 
-        {/* Dynamic Categories Section */}
-        <DynamicCategoriesSection
-          categories={categories}
-          categoryShow={15}
-          title='Categories'
-          onCategoryPress={handleCategoryPress}
-          showTitle={true}
-          columns={5}
-        />
+        <ScrollView
+          className='flex-1'
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <HeroSlider
+            slides={heroSlides}
+            onSlidePress={handleHeroSlidePress}
+            autoPlay={true}
+            autoPlayInterval={5000}
+            showIndicators={true}
+          />
 
-        {/* Explore Section */}
-        <ExploreSection
-          items={exploreItems}
-          title='Explore'
-          onItemPress={handleExploreItemPress}
-          showTitle={true}
-          columns={2}
-        />
+          {/* Dynamic Categories Section */}
+          <DynamicCategoriesSection
+            categories={categories}
+            categoryShow={12}
+            title='Categories'
+            onCategoryPress={handleCategoryPress}
+            showTitle={true}
+            columns={4}
+          />
 
-        {/* Recommended Section */}
-        <RecommendedSection
-          items={recommendedItems}
-          title='Recommended'
-          onItemPress={handleRecommendedItemPress}
-          showTitle={true}
-          showSeeAll={true}
-          onSeeAllPress={handleRecommendedSeeAll}
-        />
+          {/* Explore Section */}
+          <ExploreSection
+            items={exploreItems}
+            title='Explore'
+            onItemPress={handleExploreItemPress}
+            showTitle={true}
+            columns={2}
+            showSeeAll={true}
+            onSeeAllExplore={handleExploreSeeAll}
+          />
 
-        {/* Bottom Padding for Tab Bar */}
-        <View className='h-20' />
-      </ScrollView>
+          {/* Recommended Section */}
+          <RecommendedSection
+            items={recommendedItems}
+            title='Recommended'
+            onItemPress={handleRecommendedItemPress}
+            showTitle={true}
+            showSeeAll={true}
+            onSeeAllPress={handleRecommendedSeeAll}
+          />
+
+          {/* Bottom Padding for Tab Bar */}
+          <View className='h-20' />
+        </ScrollView>
+      </SafeAreaView>
 
       {/* Search Screen Modal */}
-      <SearchScreen
+      <Modal
         visible={showSearchScreen}
-        onClose={() => setShowSearchScreen(false)}
-      />
-    </SafeAreaView>
+        animationType='slide'
+        presentationStyle='fullScreen'
+        onRequestClose={() => setShowSearchScreen(false)}
+      >
+        <SearchScreen
+          visible={showSearchScreen}
+          onClose={() => setShowSearchScreen(false)}
+        />
+      </Modal>
+    </>
   );
 }

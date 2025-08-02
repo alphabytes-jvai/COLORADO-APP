@@ -163,13 +163,13 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ onClose }) => {
   };
 
   const MapPlaceholder = () => (
-    <View className="flex-1 bg-green-100 relative justify-center items-center">
+    <View className='flex-1 bg-green-100 relative justify-center items-center'>
       {/* Map Background Pattern */}
-      <View className="absolute inset-0 opacity-20">
+      <View className='absolute inset-0 opacity-20'>
         {Array.from({ length: 20 }).map((_, i) => (
           <View
             key={i}
-            className="absolute bg-green-300"
+            className='absolute bg-green-300'
             style={{
               width: Math.random() * 100 + 50,
               height: Math.random() * 100 + 50,
@@ -182,36 +182,36 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ onClose }) => {
       </View>
 
       {/* Selected Location Marker */}
-      <View className="absolute top-1/3 left-1/2 transform -translate-x-6 -translate-y-12">
-        <View className="bg-red-500 w-12 h-12 rounded-full items-center justify-center shadow-lg">
-          <MapPin size={24} color="white" />
+      <View className='absolute top-1/3 left-1/2 transform -translate-x-6 -translate-y-12'>
+        <View className='bg-red-500 w-12 h-12 rounded-full items-center justify-center shadow-lg'>
+          <MapPin size={24} color='white' />
         </View>
-        <View className="w-1 h-6 bg-red-500 self-center" />
+        <View className='w-1 h-6 bg-red-500 self-center' />
       </View>
 
       {/* Route Path */}
-      <View className="absolute top-1/2 left-1/4 w-48 h-24">
-        <View className="border-4 border-green-500 border-dashed rounded-full opacity-60 transform rotate-12" />
+      <View className='absolute top-1/2 left-1/4 w-48 h-24'>
+        <View className='border-4 border-green-500 border-dashed rounded-full opacity-60 transform rotate-12' />
       </View>
 
       {/* Navigation Info */}
-      <View className="absolute bottom-4 left-4 right-4">
-        <View className="bg-white rounded-xl p-4 shadow-lg">
-          <View className="flex-row items-center mb-2">
-            <MapPin size={16} color="#ef4444" />
-            <Text className="text-sm font-semibold text-black ml-2 flex-1">
+      <View className='absolute bottom-4 left-4 right-4'>
+        <View className='bg-white rounded-xl p-4 shadow-lg'>
+          <View className='flex-row items-center mb-2'>
+            <MapPin size={16} color='#ef4444' />
+            <Text className='text-sm font-semibold text-black ml-2 flex-1'>
               {selectedLocation.name}
             </Text>
           </View>
-          <Text className="text-xs text-gray-600 mb-3">
+          <Text className='text-xs text-gray-600 mb-3'>
             {selectedLocation.address}
           </Text>
           <TouchableOpacity
             onPress={handleGetDirections}
-            className="bg-green-500 rounded-lg py-3 flex-row items-center justify-center"
+            className='bg-green-500 rounded-lg py-3 flex-row items-center justify-center'
           >
-            <Navigation2 size={16} color="white" />
-            <Text className="text-white font-semibold ml-2">
+            <Navigation2 size={16} color='white' />
+            <Text className='text-white font-semibold ml-2'>
               <TranslatedText>Get Directions</TranslatedText>
             </Text>
           </TouchableOpacity>
@@ -221,37 +221,37 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ onClose }) => {
   );
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar barStyle="light-content" backgroundColor="#4DBA28" />
+    <View className='flex-1 bg-white'>
+      <StatusBar barStyle='light-content' backgroundColor='#4DBA28' />
 
       {/* Header */}
-      <View className="bg-green-500 pt-12 pb-4 px-4">
-        <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={onClose} className="p-2">
-            <ArrowLeft size={24} color="white" />
+      <View className='bg-green-500 pt-12 pb-4 px-4'>
+        <View className='flex-row items-center justify-between mb-4'>
+          <TouchableOpacity onPress={onClose} className='p-2'>
+            <ArrowLeft size={24} color='white' />
           </TouchableOpacity>
-          <Text className="text-white text-lg font-semibold">
+          <Text className='text-white text-lg font-semibold'>
             <TranslatedText>Explore & Navigate</TranslatedText>
           </Text>
-          <TouchableOpacity className="p-2">
-            <Menu size={24} color="white" />
+          <TouchableOpacity className='p-2'>
+            <Menu size={24} color='white' />
           </TouchableOpacity>
         </View>
 
         {/* Search Bar */}
-        <View className="bg-white rounded-lg flex-row items-center px-3 py-2">
-          <Search size={20} color="#666" />
+        <View className='bg-white rounded-lg flex-row items-center px-3 py-2'>
+          <Search size={20} color='#666' />
           <TextInput
-            className="flex-1 ml-3 text-black"
-            placeholder="Search places..."
-            placeholderTextColor="#999"
+            className='flex-1 ml-3 text-black'
+            placeholder='Search places...'
+            placeholderTextColor='#999'
             value={searchQuery}
             onChangeText={setSearchQuery}
             onFocus={() => setIsSearching(true)}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <X size={20} color="#666" />
+              <X size={20} color='#666' />
             </TouchableOpacity>
           )}
         </View>
@@ -259,25 +259,25 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ onClose }) => {
 
       {/* Search Results Overlay */}
       {isSearching && (
-        <View className="absolute top-32 left-4 right-4 bg-white rounded-lg shadow-lg z-10 max-h-64">
+        <View className='absolute top-32 left-4 right-4 bg-white rounded-lg shadow-lg z-10 max-h-64'>
           <FlatList
             data={filteredLocations}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => handleLocationSelect(item)}
-                className="p-4 border-b border-gray-100"
+                className='p-4 border-b border-gray-100'
               >
-                <Text className="font-semibold text-black">{item.name}</Text>
-                <Text className="text-sm text-gray-600 mt-1">
+                <Text className='font-semibold text-black'>{item.name}</Text>
+                <Text className='text-sm text-gray-600 mt-1'>
                   {item.address}
                 </Text>
-                <Text className="text-xs text-green-600 mt-1">{item.type}</Text>
+                <Text className='text-xs text-green-600 mt-1'>{item.type}</Text>
               </TouchableOpacity>
             )}
             ListEmptyComponent={
-              <View className="p-4">
-                <Text className="text-gray-500 text-center">
+              <View className='p-4'>
+                <Text className='text-gray-500 text-center'>
                   <TranslatedText>No locations found</TranslatedText>
                 </Text>
               </View>
@@ -290,12 +290,12 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({ onClose }) => {
       <MapPlaceholder />
 
       {/* Map Controls */}
-      <View className="absolute right-4 top-48 space-y-2">
-        <TouchableOpacity className="bg-white p-3 rounded-lg shadow-lg">
-          <Locate size={20} color="#4DBA28" />
+      <View className='absolute right-4 top-48 space-y-2'>
+        <TouchableOpacity className='bg-white p-3 rounded-lg shadow-lg'>
+          <Locate size={20} color='#4DBA28' />
         </TouchableOpacity>
-        <TouchableOpacity className="bg-white p-3 rounded-lg shadow-lg">
-          <RotateCcw size={20} color="#4DBA28" />
+        <TouchableOpacity className='bg-white p-3 rounded-lg shadow-lg'>
+          <RotateCcw size={20} color='#4DBA28' />
         </TouchableOpacity>
       </View>
     </View>
@@ -359,45 +359,45 @@ const OfflineMap: React.FC<OfflineMapProps> = ({ onClose }) => {
     const isDownloading = downloadingRegions.includes(item.id);
 
     return (
-      <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-        <View className="flex-row items-start justify-between mb-3">
-          <View className="flex-1">
-            <Text className="text-lg font-semibold text-black mb-1">
+      <View className='bg-white rounded-xl p-4 mb-4 shadow-sm'>
+        <View className='flex-row items-start justify-between mb-3'>
+          <View className='flex-1'>
+            <Text className='text-lg font-semibold text-black mb-1'>
               {item.name}
             </Text>
-            <Text className="text-sm text-gray-600 mb-2">{item.coverage}</Text>
-            <Text className="text-xs text-green-600 font-medium">
+            <Text className='text-sm text-gray-600 mb-2'>{item.coverage}</Text>
+            <Text className='text-xs text-green-600 font-medium'>
               {item.size}
             </Text>
           </View>
 
-          <View className="ml-4">
+          <View className='ml-4'>
             {item.downloaded ? (
-              <View className="flex-row items-center">
-                <CheckCircle2 size={20} color="#22c55e" />
+              <View className='flex-row items-center'>
+                <CheckCircle2 size={20} color='#22c55e' />
                 <TouchableOpacity
                   onPress={() => handleDelete(item.id)}
-                  className="ml-3 bg-red-100 px-3 py-1 rounded-lg"
+                  className='ml-3 bg-red-100 px-3 py-1 rounded-lg'
                 >
-                  <Text className="text-red-600 text-sm font-medium">
+                  <Text className='text-red-600 text-sm font-medium'>
                     <TranslatedText>Delete</TranslatedText>
                   </Text>
                 </TouchableOpacity>
               </View>
             ) : isDownloading ? (
-              <View className="flex-row items-center">
-                <ActivityIndicator size="small" color="#4DBA28" />
-                <Text className="text-green-600 text-sm ml-2">
+              <View className='flex-row items-center'>
+                <ActivityIndicator size='small' color='#4DBA28' />
+                <Text className='text-green-600 text-sm ml-2'>
                   <TranslatedText>Downloading...</TranslatedText>
                 </Text>
               </View>
             ) : (
               <TouchableOpacity
                 onPress={() => handleDownload(item.id)}
-                className="bg-green-500 px-4 py-2 rounded-lg flex-row items-center"
+                className='bg-green-500 px-4 py-2 rounded-lg flex-row items-center'
               >
-                <Download size={16} color="white" />
-                <Text className="text-white text-sm font-medium ml-2">
+                <Download size={16} color='white' />
+                <Text className='text-white text-sm font-medium ml-2'>
                   <TranslatedText>Download</TranslatedText>
                 </Text>
               </TouchableOpacity>
@@ -406,9 +406,9 @@ const OfflineMap: React.FC<OfflineMapProps> = ({ onClose }) => {
         </View>
 
         {isDownloading && (
-          <View className="mt-3">
-            <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <View className="h-full bg-green-500 rounded-full animate-pulse w-3/4" />
+          <View className='mt-3'>
+            <View className='h-2 bg-gray-200 rounded-full overflow-hidden'>
+              <View className='h-full bg-green-500 rounded-full animate-pulse w-3/4' />
             </View>
           </View>
         )}
@@ -424,37 +424,37 @@ const OfflineMap: React.FC<OfflineMapProps> = ({ onClose }) => {
     }, 0);
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <StatusBar barStyle="light-content" backgroundColor="#4DBA28" />
+    <View className='flex-1 bg-gray-50'>
+      <StatusBar barStyle='light-content' backgroundColor='#4DBA28' />
 
       {/* Header */}
-      <View className="bg-green-500 pt-12 pb-6 px-4">
-        <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={onClose} className="p-2">
-            <ArrowLeft size={24} color="white" />
+      <View className='bg-green-500 pt-12 pb-6 px-4'>
+        <View className='flex-row items-center justify-between mb-4'>
+          <TouchableOpacity onPress={onClose} className='p-2'>
+            <ArrowLeft size={24} color='white' />
           </TouchableOpacity>
-          <Text className="text-white text-lg font-semibold">
+          <Text className='text-white text-lg font-semibold'>
             <TranslatedText>Offline Maps</TranslatedText>
           </Text>
-          <View className="w-10" />
+          <View className='w-10' />
         </View>
 
         {/* Stats */}
-        <View className="bg-white/20 rounded-lg p-4">
-          <View className="flex-row justify-between items-center">
+        <View className='bg-white/20 rounded-lg p-4'>
+          <View className='flex-row justify-between items-center'>
             <View>
-              <Text className="text-white/80 text-sm">
+              <Text className='text-white/80 text-sm'>
                 <TranslatedText>Downloaded Regions</TranslatedText>
               </Text>
-              <Text className="text-white text-xl font-bold">
+              <Text className='text-white text-xl font-bold'>
                 {downloadedCount}
               </Text>
             </View>
             <View>
-              <Text className="text-white/80 text-sm">
+              <Text className='text-white/80 text-sm'>
                 <TranslatedText>Total Size</TranslatedText>
               </Text>
-              <Text className="text-white text-xl font-bold">
+              <Text className='text-white text-xl font-bold'>
                 {totalSize} MB
               </Text>
             </View>
@@ -463,8 +463,8 @@ const OfflineMap: React.FC<OfflineMapProps> = ({ onClose }) => {
       </View>
 
       {/* Content */}
-      <View className="flex-1 px-4 py-6">
-        <Text className="text-lg font-semibold text-black mb-4">
+      <View className='flex-1 px-4 py-6'>
+        <Text className='text-lg font-semibold text-black mb-4'>
           <TranslatedText>Available Regions</TranslatedText>
         </Text>
 
@@ -474,8 +474,8 @@ const OfflineMap: React.FC<OfflineMapProps> = ({ onClose }) => {
           renderItem={renderRegion}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={
-            <View className="mt-4 p-4 bg-blue-50 rounded-xl">
-              <Text className="text-blue-800 text-sm text-center">
+            <View className='mt-4 p-4 bg-blue-50 rounded-xl'>
+              <Text className='text-blue-800 text-sm text-center'>
                 <TranslatedText>
                   Offline maps allow you to navigate without internet
                   connection. Download regions before traveling to remote areas.
@@ -495,18 +495,33 @@ export default function MapScreen() {
   const [featureUsed, setFeatureUsed] = useState(false);
   const { canUseFeature, useFeature, isPremium } = usePremium();
 
-  // Pre-fetch feature access and usage
+  // Fixed: Move all hook calls to top level - no nested functions
   useEffect(() => {
-    const checkAndUseFeature = async () => {
-      const canUse = await canUseFeature(PREMIUM_FEATURES.NAVIGATION.id);
-      if (!isPremium && !canUse) {
-        setShowPremiumModal(true);
-      } else {
-        const used = await useFeature(PREMIUM_FEATURES.NAVIGATION.id);
-        setFeatureUsed(used);
+    let isMounted = true;
+
+    const checkFeatureAccess = async () => {
+      try {
+        const canUse = await canUseFeature(PREMIUM_FEATURES.NAVIGATION.id);
+        if (!isMounted) return;
+
+        if (!isPremium && !canUse) {
+          setShowPremiumModal(true);
+        } else {
+          const used = await useFeature(PREMIUM_FEATURES.NAVIGATION.id);
+          if (isMounted) {
+            setFeatureUsed(used);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking feature access:", error);
       }
     };
-    checkAndUseFeature();
+
+    checkFeatureAccess();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isPremium, canUseFeature, useFeature]);
 
   const handleMapOptionPress = (optionId: string) => {
@@ -548,32 +563,32 @@ export default function MapScreen() {
       <TouchableOpacity
         key={option.id}
         onPress={option.onPress}
-        className="bg-green-50 rounded-2xl p-4 mb-4 flex-row items-center justify-between"
+        className='bg-green-50 rounded-2xl p-4 mb-4 flex-row items-center justify-between'
         activeOpacity={0.7}
       >
-        <View className="flex-row items-center flex-1">
-          <View className="w-12 h-12 bg-white rounded-full items-center justify-center mr-4">
+        <View className='flex-row items-center flex-1'>
+          <View className='w-12 h-12 bg-white rounded-full items-center justify-center mr-4'>
             <IconComponent size={24} color={option.color} />
           </View>
-          <View className="flex-1">
-            <Text className="text-lg font-semibold text-black mb-1">
+          <View className='flex-1'>
+            <Text className='text-lg font-semibold text-black mb-1'>
               <TranslatedText>{option.title}</TranslatedText>
             </Text>
-            <Text className="text-gray-600 text-sm">
+            <Text className='text-gray-600 text-sm'>
               <TranslatedText>{option.subtitle}</TranslatedText>
             </Text>
           </View>
         </View>
-        <ChevronRight size={20} color="#666" />
+        <ChevronRight size={20} color='#666' />
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 px-5 py-6">
+    <SafeAreaView className='flex-1 bg-white'>
+      <View className='flex-1 px-5 py-6'>
         {/* Header */}
-        <Text className="text-2xl font-bold text-black mb-8">
+        <Text className='text-2xl font-bold text-black mb-8'>
           <TranslatedText>Map & Navigate</TranslatedText>
         </Text>
 
@@ -581,8 +596,8 @@ export default function MapScreen() {
         <View>{mapOptions.map(renderMapOption)}</View>
 
         {/* Info Text */}
-        <View className="mt-8 p-4 bg-blue-50 rounded-xl">
-          <Text className="text-blue-800 text-sm text-center">
+        <View className='mt-8 p-4 bg-blue-50 rounded-xl'>
+          <Text className='text-blue-800 text-sm text-center'>
             <TranslatedText>
               Access detailed maps and navigation features to explore
               Colorado&apos;s best destinations.
@@ -594,8 +609,8 @@ export default function MapScreen() {
       {/* Interactive Map Modal */}
       <Modal
         visible={activeModal === "interactive"}
-        animationType="slide"
-        presentationStyle="fullScreen"
+        animationType='slide'
+        presentationStyle='fullScreen'
       >
         <InteractiveMap onClose={() => setActiveModal(null)} />
       </Modal>
@@ -603,8 +618,8 @@ export default function MapScreen() {
       {/* Offline Map Modal */}
       <Modal
         visible={activeModal === "offline"}
-        animationType="slide"
-        presentationStyle="fullScreen"
+        animationType='slide'
+        presentationStyle='fullScreen'
       >
         <OfflineMap onClose={() => setActiveModal(null)} />
       </Modal>
@@ -614,7 +629,7 @@ export default function MapScreen() {
         visible={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
         onSubscribe={handleSubscribe}
-        feature="Navigation & Maps"
+        feature='Navigation & Maps'
       />
     </SafeAreaView>
   );

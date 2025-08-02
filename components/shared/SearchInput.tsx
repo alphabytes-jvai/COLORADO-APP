@@ -1,4 +1,4 @@
-import { View, TextInput, TouchableOpacity } from "react-native";
+import { TextInput, TouchableOpacity } from "react-native";
 import { Search } from "lucide-react-native";
 import { createShadow } from "@/utils/shadows";
 
@@ -8,6 +8,7 @@ interface SearchInputProps {
   onChangeText?: (text: string) => void;
   onPress?: () => void;
   className?: string;
+  iconShow?: boolean
 }
 
 export function SearchInput({
@@ -16,31 +17,32 @@ export function SearchInput({
   onChangeText,
   onPress,
   className,
+  iconShow = true,
 }: SearchInputProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`flex-row items-center rounded-xl pl-5 pr-3 py-2 ${className}`}
+      className={`flex-row items-center rounded-base pl-1 pr-3 py-2 ${className}`}
       style={createShadow({
         x: 0,
         y: 0,
-        blur: 12.5, 
+        blur: 12.5,
         color: "#000000",
-        opacity: 0.06, 
+        opacity: 0.06,
         elevation: 2,
       })}
       activeOpacity={onPress ? 0.7 : 1}
     >
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor='#9CA3AF'
         value={value}
         onChangeText={onChangeText}
         editable={!onPress}
         pointerEvents={onPress ? "none" : "auto"}
-        className="flex-1 ml-2 text-gray-800"
+        className='flex-1 ml-2 text-gray-800'
       />
-      <Search size={20} color="#4DBA28" />
+      {iconShow && <Search size={20} color='#4DBA28' />}
     </TouchableOpacity>
   );
 }
