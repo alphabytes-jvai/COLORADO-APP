@@ -13,6 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { Button } from "@/components/ui/Button";
 import { Send, Bot, User } from "lucide-react-native";
+import { PremiumModal } from "@/components/ui/PremiumModal";
+import { usePremium, PREMIUM_FEATURES } from "@/hooks/usePremium";
 
 interface Message {
   id: string;
@@ -39,6 +41,8 @@ export default function AskAIScreen() {
   ]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const { canUseFeature, useFeature, isPremium } = usePremium();
 
   const generateAIResponse = (question: string): string => {
     // Mock AI responses based on question content
@@ -65,6 +69,19 @@ export default function AskAIScreen() {
 
   const sendMessage = async () => {
     if (!inputText.trim()) return;
+
+    // Check if user can use AI feature
+    if (!isPremium && !canUseFeature(PREMIUM_FEATURES.AI_CHAT.id)) {
+      setShowPremiumModal(true);
+      return;
+    }
+
+    // Use the feature (increment counter for free users)
+    const canUse = await useFeature(PREMIUM_FEATURES.AI_CHAT.id);
+    if (!canUse) {
+      setShowPremiumModal(true);
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -93,6 +110,13 @@ export default function AskAIScreen() {
 
   const handleSuggestedQuestion = (question: string) => {
     setInputText(question);
+  };
+
+  const handleSubscribe = (plan: "monthly" | "yearly") => {
+    // Handle subscription logic here
+    console.log("Subscribe to:", plan);
+    setShowPremiumModal(false);
+    // You would integrate with your payment system here
   };
 
   const renderMessage = (message: Message) => (
@@ -217,6 +241,14 @@ export default function AskAIScreen() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Premium Modal */}
+      <PremiumModal
+        visible={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        onSubscribe={handleSubscribe}
+        feature="AI Assistant"
+      />
     </SafeAreaView>
   );
 }

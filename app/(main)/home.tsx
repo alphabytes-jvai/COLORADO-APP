@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { SearchInput } from "@/components/shared/SearchInput";
+import { SearchScreen } from "@/components/shared/SearchScreen";
 import { useAppStore } from "@/store/useAppStore";
 import { Bell } from "lucide-react-native";
 import { CategoryService } from "@/services/homeService";
@@ -33,6 +34,7 @@ export default function HomeScreen() {
   const { user } = useAppStore();
   const [refreshing, setRefreshing] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [showSearchScreen, setShowSearchScreen] = useState(false);
 
   // Data from service
   const [categories, setCategories] = useState<Category[]>([]);
@@ -118,11 +120,11 @@ export default function HomeScreen() {
 
   const handleSearch = (text: string) => {
     setSearchText(text);
-    if (text.length > 2) {
-      // Perform search
-      const searchResults = CategoryService.searchCategories(text);
-      console.log("Search results:", searchResults);
-    }
+    setShowSearchScreen(true);
+  };
+
+  const handleSearchInputPress = () => {
+    setShowSearchScreen(true);
   };
 
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
@@ -175,6 +177,7 @@ export default function HomeScreen() {
           placeholder='Search here'
           value={searchText}
           onChangeText={handleSearch}
+          onPress={handleSearchInputPress}
           className='mb-4 bg-white rounded-[10px]'
         />
       </View>
@@ -198,15 +201,11 @@ export default function HomeScreen() {
         {/* Dynamic Categories Section */}
         <DynamicCategoriesSection
           categories={categories}
-          categoryShow={12}
+          categoryShow={15}
           title='Categories'
           onCategoryPress={handleCategoryPress}
           showTitle={true}
           columns={5}
-          showMoreText='Show More'
-          showLessText='Show Less'
-          showMoreIcon='⬇️'
-          showLessIcon='⬆️'
         />
 
         {/* Explore Section */}
@@ -231,6 +230,12 @@ export default function HomeScreen() {
         {/* Bottom Padding for Tab Bar */}
         <View className='h-20' />
       </ScrollView>
+
+      {/* Search Screen Modal */}
+      <SearchScreen
+        visible={showSearchScreen}
+        onClose={() => setShowSearchScreen(false)}
+      />
     </SafeAreaView>
   );
 }

@@ -11,6 +11,9 @@ interface NotificationCardProps {
   title: string;
   message: string;
   time: string;
+  isRead?: boolean;
+  onPress?: () => void;
+  onMarkAsRead?: () => void;
   isFontAwesome?: boolean;
   fontAwesomeName?: string;
 }
@@ -22,15 +25,36 @@ export function NotificationCard({
   title,
   message,
   time,
+  isRead = false,
+  onPress,
+  onMarkAsRead,
   isFontAwesome = false,
   fontAwesomeName,
 }: NotificationCardProps) {
+  const handlePress = () => {
+    if (!isRead && onMarkAsRead) {
+      onMarkAsRead();
+    }
+    if (onPress) {
+      onPress();
+    }
+  };
+
   return (
-    <View
-      className="bg-white rounded-md p-4 mb-3 border border-gray-100"
+    <TouchableOpacity
+      onPress={handlePress}
+      className={`bg-white rounded-md p-4 mb-3 border border-gray-100 ${
+        !isRead ? "bg-blue-50 border-blue-200" : ""
+      }`}
       style={getCardShadow("sm")}
+      activeOpacity={0.7}
     >
       <View className="flex-row">
+        {/* Unread Indicator */}
+        {!isRead && (
+          <View className="w-2 h-2 bg-blue-500 rounded-full absolute top-2 right-2" />
+        )}
+        
         <View
           className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${iconBgColor}`}
         >
@@ -45,15 +69,23 @@ export function NotificationCard({
           )}
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-800 mb-1  ">
+          <Text className={`text-base font-semibold mb-1 ${
+            !isRead ? "text-gray-900" : "text-gray-800"
+          }`}>
             {title}
           </Text>
-          <Text className="text-sm text-gray-600 mb-2   leading-5">
+          <Text className={`text-sm mb-2 leading-5 ${
+            !isRead ? "text-gray-700" : "text-gray-600"
+          }`}>
             {message}
           </Text>
-          <Text className="text-xs text-gray-400  ">{time}</Text>
+          <Text className={`text-xs ${
+            !isRead ? "text-gray-500" : "text-gray-400"
+          }`}>
+            {time}
+          </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

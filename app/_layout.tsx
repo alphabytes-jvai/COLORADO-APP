@@ -15,6 +15,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as SplashScreen from "expo-splash-screen";
 import "../global.css";
 import Toast from "react-native-toast-message";
+import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
+import { useAppStore } from "@/store/useAppStore";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync();
@@ -35,6 +37,8 @@ const queryClient = new QueryClient({
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { requestPermission } = useNotificationPermissions();
+  const { isAuthenticated } = useAppStore();
   const [loaded] = useFonts({
     "Poppins-Thin": require("../assets/fonts/poppins/Poppins-Thin.ttf"),
     "Poppins-Regular": require("../assets/fonts/poppins/Poppins-Regular.ttf"),
@@ -47,8 +51,15 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      
+      // Request notification permission after app loads
+      if (isAuthenticated) {
+        setTimeout(() => {
+          requestPermission();
+        }, 2000);
+      }
     }
-  }, [loaded]);
+  }, [loaded, isAuthenticated, requestPermission]);
 
   if (!loaded) {
     return null;

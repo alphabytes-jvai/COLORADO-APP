@@ -8,21 +8,22 @@ import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAppStore } from "@/store/useAppStore";
 import {
-  Globe,
-  Moon,
   Bell,
-  Shield,
-  HelpCircle,
+  Globe,
+  DollarSign,
+  Map,
+  Lock,
+  FileText,
   LogOut,
   ChevronRight,
   User,
-  Settings as SettingsIcon,
 } from "lucide-react-native";
 import { router } from "expo-router";
+import { Image } from "expo-image";
 
 export default function SettingsScreen() {
   const { currentLanguage } = useTranslation();
-  const { user, logout, setHasSeenOnboarding, theme, setTheme } = useAppStore();
+  const { user, logout, setHasSeenOnboarding } = useAppStore();
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
 
   const getCurrentLanguageName = () => {
@@ -43,55 +44,40 @@ export default function SettingsScreen() {
 
   const settingsItems = [
     {
-      id: "profile",
-      title: "Profile Settings",
-      subtitle: "Manage your account information",
-      icon: <User size={24} color="#4DBA28" />,
-      onPress: () => console.log("Profile settings"),
+      id: "notifications",
+      title: "Notifications",
+      icon: <Bell size={24} color="#4DBA28" />,
+      onPress: () => router.push("/(screen)/notifications"),
     },
     {
       id: "language",
       title: "Language",
-      subtitle: getCurrentLanguageName(),
       icon: <Globe size={24} color="#4DBA28" />,
       onPress: () => setShowLanguageSelector(true),
     },
     {
-      id: "theme",
-      title: "Theme",
-      subtitle:
-        theme === "dark"
-          ? "Dark Mode"
-          : theme === "light"
-            ? "Light Mode"
-            : "System",
-      icon: <Moon size={24} color="#4DBA28" />,
-      onPress: () => {
-        const nextTheme =
-          theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
-        setTheme(nextTheme);
-      },
+      id: "plans",
+      title: "My Plans",
+      icon: <DollarSign size={24} color="#4DBA28" />,
+      onPress: () => console.log("My Plans"),
     },
     {
-      id: "notifications",
-      title: "Notifications",
-      subtitle: "Manage notification preferences",
-      icon: <Bell size={24} color="#4DBA28" />,
-      onPress: () => console.log("Notifications"),
+      id: "offline-map",
+      title: "Offline Map",
+      icon: <Map size={24} color="#4DBA28" />,
+      onPress: () => router.push("/(main)/map"),
     },
     {
-      id: "privacy",
-      title: "Privacy & Security",
-      subtitle: "Control your privacy settings",
-      icon: <Shield size={24} color="#4DBA28" />,
-      onPress: () => console.log("Privacy"),
+      id: "change-password",
+      title: "Change Password",
+      icon: <Lock size={24} color="#4DBA28" />,
+      onPress: () => console.log("Change Password"),
     },
     {
-      id: "help",
-      title: "Help & Support",
-      subtitle: "Get help and contact support",
-      icon: <HelpCircle size={24} color="#4DBA28" />,
-      onPress: () => console.log("Help"),
+      id: "terms",
+      title: "Terms & Policies",
+      icon: <FileText size={24} color="#4DBA28" />,
+      onPress: () => router.push("/(screen)/privacy-policy"),
     },
   ];
 
@@ -104,19 +90,86 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-surface">
       {/* Header */}
-      <View className="px-5 py-4 border-b border-gray-200">
-        <View className="flex-row items-center">
-          <SettingsIcon size={28} color="#4DBA28" />
-          <Text className="text-2xl font-bold text-black ml-3">
-            <TranslatedText>Settings</TranslatedText>
-          </Text>
-        </View>
+      <View className="px-5 py-4">
+        <Text className="text-2xl font-bold text-black text-center">
+          <TranslatedText>Settings</TranslatedText>
+        </Text>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         {/* User Info */}
         {user && (
-          <View className="bg-white mx-5 mt-5 p-4 rounded-lg border border-gray-200">
+          <View className="bg-green-50 p-4 rounded-2xl mb-6 flex-row items-center">
+            <View className="w-16 h-16 bg-gray-200 rounded-full items-center justify-center mr-4">
+              <Image
+                source={{ uri: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg" }}
+                className="w-16 h-16 rounded-full"
+                contentFit="cover"
+              />
+            </View>
+            <View className="flex-1">
+              <Text className="text-xl font-bold text-black">
+                Daniel Smeeth
+              </Text>
+              <Text className="text-gray-600 mt-1">
+                danial123@gmail.com
+              </Text>
+            </View>
+            <ChevronRight size={20} color="#4DBA28" />
+          </View>
+        )}
+
+        {/* Settings Items */}
+        <View className="space-y-4">
+          {settingsItems.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              onPress={item.onPress}
+              className="bg-white p-4 rounded-2xl flex-row items-center justify-between shadow-sm"
+              activeOpacity={0.7}
+            >
+              <View className="flex-row items-center flex-1">
+                <View className="w-10 h-10 items-center justify-center mr-4">
+                  {item.icon}
+                </View>
+                <Text className="text-base font-medium text-black flex-1">
+                  <TranslatedText>{item.title}</TranslatedText>
+                </Text>
+              </View>
+              <ChevronRight size={20} color="#ccc" />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Logout Button */}
+        <TouchableOpacity
+          onPress={handleLogout}
+          className="bg-white p-4 rounded-2xl flex-row items-center justify-between shadow-sm mt-6 mb-8"
+          activeOpacity={0.7}
+        >
+          <View className="flex-row items-center flex-1">
+            <View className="w-10 h-10 items-center justify-center mr-4">
+              <LogOut size={24} color="#EF4444" />
+            </View>
+            <Text className="text-base font-medium text-red-600 flex-1">
+              <TranslatedText>Logout</TranslatedText>
+            </Text>
+          </View>
+          <ChevronRight size={20} color="#EF4444" />
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Language Selector Modal */}
+      <LanguageSelector
+        visible={showLanguageSelector}
+        onClose={() => setShowLanguageSelector(false)}
+        onLanguageSelect={(language) => {
+          console.log("Language selected:", language);
+        }}
+      />
+    </SafeAreaView>
+  );
+}
             <View className="flex-row items-center">
               <View className="w-16 h-16 bg-primary/10 rounded-full items-center justify-center">
                 <User size={32} color="#4DBA28" />

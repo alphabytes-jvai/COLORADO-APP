@@ -16,6 +16,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TranslatedText } from "@/components/ui/TranslatedText";
+import { PremiumModal } from "@/components/ui/PremiumModal";
+import { usePremium, PREMIUM_FEATURES } from "@/hooks/usePremium";
 import {
   Navigation,
   MapPin,
@@ -489,6 +491,29 @@ const OfflineMap: React.FC<OfflineMapProps> = ({ onClose }) => {
 
 export default function MapScreen() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const { canUseFeature, useFeature, isPremium } = usePremium();
+
+  const handleMapOptionPress = async (optionId: string) => {
+    // Check premium access for navigation features
+    if (!isPremium && !canUseFeature(PREMIUM_FEATURES.NAVIGATION.id)) {
+      setShowPremiumModal(true);
+      return;
+    }
+
+    const canUse = await useFeature(PREMIUM_FEATURES.NAVIGATION.id);
+    if (!canUse) {
+      setShowPremiumModal(true);
+      return;
+    }
+
+    setActiveModal(optionId);
+  };
+
+  const handleSubscribe = (plan: "monthly" | "yearly") => {
+    console.log("Subscribe to:", plan);
+    setShowPremiumModal(false);
+  };
 
   const mapOptions = [
     {
@@ -497,7 +522,7 @@ export default function MapScreen() {
       subtitle: "Interactive map with navigation",
       icon: Navigation,
       color: "#4DBA28",
-      onPress: () => setActiveModal("interactive"),
+      onPress: () => handleMapOptionPress("interactive"),
     },
     {
       id: "offline-map",
@@ -505,7 +530,7 @@ export default function MapScreen() {
       subtitle: "Download maps for offline use",
       icon: MapPin,
       color: "#4DBA28",
-      onPress: () => setActiveModal("offline"),
+      onPress: () => handleMapOptionPress("offline"),
     },
   ];
 
@@ -576,6 +601,14 @@ export default function MapScreen() {
       >
         <OfflineMap onClose={() => setActiveModal(null)} />
       </Modal>
+
+      {/* Premium Modal */}
+      <PremiumModal
+        visible={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        onSubscribe={handleSubscribe}
+        feature="Navigation & Maps"
+      />
     </SafeAreaView>
   );
 }

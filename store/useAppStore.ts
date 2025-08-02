@@ -89,7 +89,7 @@ interface Notification {
   title: string;
   message: string;
   time: string;
-  type: "info" | "success" | "warning" | "error";
+  type: "info" | "success" | "warning" | "error" | "event" | "offer" | "reward" | "cask" | "money" | "portfolio";
   read: boolean;
   priority?: "low" | "medium" | "high";
   actionUrl?: string;
@@ -193,8 +193,54 @@ export const useAppStore = create<AppState>()(
       isLoading: false,
       theme: "system",
       hasSeenOnboarding: false,
-      notifications: [],
-      unreadNotificationCount: 0,
+      notifications: [
+        {
+          id: "1",
+          title: "New Event added",
+          message: "Lorem ipsum dolor sit amet conse cat and Ridiculus vulputate pretium.",
+          time: "12 Mar, 2025",
+          type: "event",
+          read: false,
+          priority: "medium",
+        },
+        {
+          id: "2",
+          title: "New Event added",
+          message: "Lorem ipsum dolor sit amet conse cat and Ridiculus vulputate pretium.",
+          time: "12 Mar, 2025",
+          type: "event",
+          read: false,
+          priority: "medium",
+        },
+        {
+          id: "3",
+          title: "New Event added",
+          message: "Lorem ipsum dolor sit amet conse cat and Ridiculus vulputate pretium.",
+          time: "12 Mar, 2025",
+          type: "event",
+          read: true,
+          priority: "low",
+        },
+        {
+          id: "4",
+          title: "New Event added",
+          message: "Lorem ipsum dolor sit amet conse cat and Ridiculus vulputate pretium.",
+          time: "12 Mar, 2025",
+          type: "event",
+          read: true,
+          priority: "low",
+        },
+        {
+          id: "5",
+          title: "New Event added",
+          message: "Lorem ipsum dolor sit amet conse cat and Ridiculus vulputate pretium.",
+          time: "12 Mar, 2025",
+          type: "event",
+          read: false,
+          priority: "high",
+        },
+      ],
+      unreadNotificationCount: 3,
       favoriteItems: [],
       forgotPasswordEmail: null,
       signUpEmail: null,
@@ -276,6 +322,7 @@ export const useAppStore = create<AppState>()(
         const newNotification: Notification = {
           ...notification,
           id: generateId(),
+          read: false,
         };
         const currentNotifications = get().notifications;
         const updatedNotifications = [newNotification, ...currentNotifications];
