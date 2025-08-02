@@ -16,7 +16,8 @@ import * as SplashScreen from "expo-splash-screen";
 import "../global.css";
 import Toast from "react-native-toast-message";
 import { useNotificationPermissions } from "@/hooks/useNotificationPermissions";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/store/useAppStore"
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync();
@@ -36,6 +37,7 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
+  useFrameworkReady();
   const colorScheme = useColorScheme();
   const { requestPermission } = useNotificationPermissions();
   const { isAuthenticated } = useAppStore();

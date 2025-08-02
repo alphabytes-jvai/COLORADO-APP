@@ -18,20 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { PremiumModal } from "@/components/ui/PremiumModal";
 import { usePremium, PREMIUM_FEATURES } from "@/hooks/usePremium";
-import {
-  Navigation,
-  MapPin,
-  ChevronRight,
-  ArrowLeft,
-  Search,
-  Download,
-  CheckCircle2,
-  Navigation2,
-  Locate,
-  RotateCcw,
-  Menu,
-  X,
-} from "lucide-react-native";
+import { Navigation, MapPin, ChevronRight, ArrowLeft, Search, Download, CircleCheck as CheckCircle2, Navigation2, Locate, RotateCcw, Menu, X } from "lucide-react-native";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 

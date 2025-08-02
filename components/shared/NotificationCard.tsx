@@ -1,6 +1,6 @@
 // components/shared/NotificationCard.tsx
 import { View, Text } from "react-native";
-import { LucideIcon } from "lucide-react-native";
+import { Video as LucideIcon } from "lucide-react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getCardShadow } from "@/utils/shadows";
 
