@@ -1,5 +1,5 @@
 // app/(main)/map.tsx
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,7 +18,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { PremiumModal } from "@/components/ui/PremiumModal";
 import { usePremium, PREMIUM_FEATURES } from "@/hooks/usePremium";
-import { Navigation, MapPin, ChevronRight, ArrowLeft, Search, Download, CircleCheck as CheckCircle2, Navigation2, Locate, RotateCcw, Menu, X } from "lucide-react-native";
+import {
+  Navigation,
+  MapPin,
+  ChevronRight,
+  ArrowLeft,
+  Search,
+  Download,
+  CircleCheck as CheckCircle2,
+  Navigation2,
+  Locate,
+  RotateCcw,
+  Menu,
+  X,
+} from "lucide-react-native";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -479,21 +492,28 @@ const OfflineMap: React.FC<OfflineMapProps> = ({ onClose }) => {
 export default function MapScreen() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [featureUsed, setFeatureUsed] = useState(false);
   const { canUseFeature, useFeature, isPremium } = usePremium();
 
-  const handleMapOptionPress = async (optionId: string) => {
-    // Check premium access for navigation features
-    if (!isPremium && !canUseFeature(PREMIUM_FEATURES.NAVIGATION.id)) {
+  // Pre-fetch feature access and usage
+  useEffect(() => {
+    const checkAndUseFeature = async () => {
+      const canUse = await canUseFeature(PREMIUM_FEATURES.NAVIGATION.id);
+      if (!isPremium && !canUse) {
+        setShowPremiumModal(true);
+      } else {
+        const used = await useFeature(PREMIUM_FEATURES.NAVIGATION.id);
+        setFeatureUsed(used);
+      }
+    };
+    checkAndUseFeature();
+  }, [isPremium, canUseFeature, useFeature]);
+
+  const handleMapOptionPress = (optionId: string) => {
+    if (!isPremium && !featureUsed) {
       setShowPremiumModal(true);
       return;
     }
-
-    const canUse = await useFeature(PREMIUM_FEATURES.NAVIGATION.id);
-    if (!canUse) {
-      setShowPremiumModal(true);
-      return;
-    }
-
     setActiveModal(optionId);
   };
 
