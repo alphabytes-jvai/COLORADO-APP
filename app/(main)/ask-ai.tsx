@@ -1,5 +1,6 @@
-// app/(main)/ask-ai.tsx
-import { useState } from "react";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -10,6 +11,7 @@ import {
   Platform,
   ImageBackground,
   Dimensions,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TranslatedText } from "@/components/ui/TranslatedText";
@@ -45,9 +47,35 @@ export default function AskAIScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const { canUseFeature, useFeature, isPremium } = usePremium();
+  const scrollRef = useRef<ScrollView>(null);
+
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKeyboardOffset(e.endCoordinates.height);
+      setTimeout(() => {
+        scrollRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardOffset(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  const checkAndUseFeature = async (): Promise<boolean> => {
+    if (!isPremium && !canUseFeature(PREMIUM_FEATURES.AI_CHAT.id)) {
+      return false;
+    }
+    return await useFeature(PREMIUM_FEATURES.AI_CHAT.id);
+  };
 
   const generateAIResponse = (question: string): string => {
-    // Mock AI responses based on question content
     const lowerQuestion = question.toLowerCase();
 
     if (lowerQuestion.includes("hiking") || lowerQuestion.includes("trail")) {
@@ -76,14 +104,7 @@ export default function AskAIScreen() {
   const sendMessage = async () => {
     if (!inputText.trim()) return;
 
-    // Check if user can use AI feature
-    if (!isPremium && !canUseFeature(PREMIUM_FEATURES.AI_CHAT.id)) {
-      setShowPremiumModal(true);
-      return;
-    }
-
-    // Use the feature (increment counter for free users)
-    const canUse = await useFeature(PREMIUM_FEATURES.AI_CHAT.id);
+    const canUse = await checkAndUseFeature();
     if (!canUse) {
       setShowPremiumModal(true);
       return;
@@ -100,7 +121,6 @@ export default function AskAIScreen() {
     setInputText("");
     setIsLoading(true);
 
-    // Simulate AI processing time
     setTimeout(() => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -119,10 +139,8 @@ export default function AskAIScreen() {
   };
 
   const handleSubscribe = (plan: "monthly" | "yearly") => {
-    // Handle subscription logic here
     console.log("Subscribe to:", plan);
     setShowPremiumModal(false);
-    // You would integrate with your payment system here
   };
 
   const renderMessage = (message: Message) => (
@@ -137,8 +155,10 @@ export default function AskAIScreen() {
       )}
 
       <View
-        className={`max-w-[80%] p-3 rounded-2xl ${
-          message.isUser ? "bg-primary ml-4" : "bg-gray-100 mr-4"
+        className={`max-w-[80%] p-3 mt-4 ${
+          message.isUser
+            ? "bg-primary ml-4 rounded-l-2xl rounded-br-2xl"
+            : "bg-gray-100 mr-4 rounded-r-2xl rounded-bl-2xl"
         }`}
       >
         <Text
@@ -160,130 +180,133 @@ export default function AskAIScreen() {
 
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
     Dimensions.get("window");
+
   return (
     <SafeAreaView className='flex-1 bg-surface/90'>
-      <KeyboardAvoidingView
-        className='flex-1'
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <View className='absolute -top-10 left-0 right-0'>
-          <ImageBackground
-            source={require("@/assets/images/top-cloud.png")}
-            style={{
-              width: SCREEN_WIDTH,
-              height: SCREEN_HEIGHT * 0.3,
-            }}
-            resizeMode='cover'
-          />
-        </View>
-        {/* Header */}
-        <View className='flex-row items-center justify-between px-5 py-3'>
-          {/* Back button */}
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className='w-10 h-10 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]'
-          >
-            <ChevronLeft size={24} color='#1F2937' />
-          </TouchableOpacity>
-
-          {/* Centered title */}
-          <Text className='text-2xl font-bold text-black'>
-            <TranslatedText>Ask AI</TranslatedText>
-          </Text>
-
-          {/* Right side filler with same width as the back button */}
-          <View className='w-9 h-9' />
-        </View>
-
-        {/* Messages */}
-        <ScrollView
-          className='flex-1 px-5 py-1 '
-          showsVerticalScrollIndicator={false}
+      <View className='flex-1'>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <View className='flex flex-col justify-between items-center px-5 mb-5'>
-            <Text className='text-2xl font-bold text-black'>
-              <Sparkles size={20} /> <TranslatedText>Assistance</TranslatedText>
-            </Text>
-            <Text className='text-gray-600 text-sm mt-1'>
-              <TranslatedText>
-                Your Colorado exploration assistant
-              </TranslatedText>
-            </Text>
+          <View className='absolute -top-10 left-0 right-0'>
+            <ImageBackground
+              source={require("@/assets/images/top-cloud.png")}
+              style={{
+                width: SCREEN_WIDTH,
+                height: SCREEN_HEIGHT * 0.3,
+              }}
+              resizeMode='cover'
+            />
           </View>
-          {messages.map(renderMessage)}
 
-          {isLoading && (
-            <View className='flex-row justify-start mb-4'>
-              <View className='w-8 h-8 bg-primary rounded-full items-center justify-center mr-3 mt-1'>
-                <Bot size={16} color='white' />
+          {/* Header */}
+          <View className='flex-row items-center justify-between px-5 py-3'>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className='w-10 h-10 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]'
+            >
+              <ChevronLeft size={24} color='#1F2937' />
+            </TouchableOpacity>
+            <Text className='text-2xl font-bold text-black'>
+              <TranslatedText>Ask AI</TranslatedText>
+            </Text>
+            <View className='w-9 h-9' />
+          </View>
+
+          {/* Messages */}
+          <ScrollView
+            ref={scrollRef}
+            className='flex-1 px-5 py-1'
+            contentContainerStyle={{ paddingBottom: keyboardOffset + 100 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <View className='flex flex-col justify-between items-center px-5 mb-5'>
+              <Text className='text-2xl font-bold text-black'>
+                <Sparkles size={20} />{" "}
+                <TranslatedText>Assistance</TranslatedText>
+              </Text>
+              <Text className='text-gray-600 text-sm mt-1'>
+                <TranslatedText>
+                  Your Colorado exploration assistant
+                </TranslatedText>
+              </Text>
+            </View>
+
+            {messages.map(renderMessage)}
+
+            {isLoading && (
+              <View className='flex-row justify-start mb-4'>
+                <View className='w-8 h-8 bg-primary rounded-full items-center justify-center mr-3 mt-1'>
+                  <Bot size={16} color='white' />
+                </View>
+                <View className='bg-gray-100 p-3 rounded-2xl'>
+                  <Text className='text-gray-600'>
+                    <TranslatedText>Thinking...</TranslatedText>
+                  </Text>
+                </View>
               </View>
-              <View className='bg-gray-100 p-3 rounded-2xl'>
-                <Text className='text-gray-600'>
-                  <TranslatedText>Thinking...</TranslatedText>
-                </Text>
-              </View>
+            )}
+          </ScrollView>
+
+          {/* Suggested Questions */}
+          {messages.length === 1 && (
+            <View className='px-5 py-2'>
+              <Text className='text-sm font-medium text-gray-700 mb-3'>
+                <TranslatedText>Try asking:</TranslatedText>
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {suggestedQuestions.map((question, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => handleSuggestedQuestion(question)}
+                    className='bg-gray-100 px-4 py-2 rounded-full mr-3'
+                  >
+                    <Text className='text-gray-700 text-sm'>
+                      <TranslatedText>{question}</TranslatedText>
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </View>
           )}
-        </ScrollView>
 
-        {/* Suggested Questions */}
-        {messages.length === 1 && (
-          <View className='px-5 py-2'>
-            <Text className='text-sm font-medium text-gray-700 mb-3'>
-              <TranslatedText>Try asking:</TranslatedText>
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {suggestedQuestions.map((question, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleSuggestedQuestion(question)}
-                  className='bg-gray-100 px-4 py-2 rounded-full mr-3'
-                >
-                  <Text className='text-gray-700 text-sm'>
-                    <TranslatedText>{question}</TranslatedText>
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
-        {/* Input */}
-        <View className='px-5 py-4 bg-white border-t border-gray-100'>
-          <View className='flex-row items-center'>
-            <TextInput
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder='Ask me anything about Colorado...'
-              placeholderTextColor='#9CA3AF'
-              className='flex-1 bg-gray-100 rounded-full px-4 py-3 mr-3 text-base'
-              multiline
-              maxLength={500}
-              onSubmitEditing={sendMessage}
-            />
-            <TouchableOpacity
-              onPress={sendMessage}
-              disabled={!inputText.trim() || isLoading}
-              className={`w-12 h-12 rounded-full items-center justify-center ${
-                inputText.trim() && !isLoading ? "bg-primary" : "bg-gray-300"
-              }`}
-            >
-              <Send
-                size={20}
-                color={inputText.trim() && !isLoading ? "black" : "gray"}
+          {/* Input */}
+          <View className='px-5 py-4 bg-white border-t border-gray-100'>
+            <View className='flex-row items-center'>
+              <TextInput
+                value={inputText}
+                onChangeText={setInputText}
+                placeholder='Ask me anything about Colorado...'
+                placeholderTextColor='#9CA3AF'
+                className='flex-1 bg-gray-100 rounded-full px-4 py-3 mr-3 text-base'
+                multiline
+                maxLength={500}
+                onSubmitEditing={sendMessage}
               />
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={sendMessage}
+                disabled={!inputText.trim() || isLoading}
+                className={`w-12 h-12 rounded-full items-center justify-center ${
+                  inputText.trim() && !isLoading ? "bg-primary" : "bg-gray-300"
+                }`}
+              >
+                <Send
+                  size={20}
+                  color={inputText.trim() && !isLoading ? "black" : "gray"}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
 
-      {/* Premium Modal */}
-      <PremiumModal
-        visible={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-        onSubscribe={handleSubscribe}
-        feature='AI Assistant'
-      />
+        {/* Premium Modal */}
+        <PremiumModal
+          visible={showPremiumModal}
+          onClose={() => setShowPremiumModal(false)}
+          onSubscribe={handleSubscribe}
+          feature='AI Assistant'
+        />
+      </View>
     </SafeAreaView>
   );
 }
