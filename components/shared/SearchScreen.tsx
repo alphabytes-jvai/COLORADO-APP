@@ -368,7 +368,7 @@ export function SearchScreen({ visible, onClose }: SearchScreenProps) {
   return (
     <SafeAreaView className='flex-1 bg-gray-50'>
       {/* Header */}
-      <View className='flex-row items-center px-4 py-3 bg-white border-b border-gray-100'>
+      <View className='flex flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100'>
         <View className='w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'>
           <TouchableOpacity onPress={onClose}>
             <ChevronLeft size={24} color='#374151' />
@@ -377,6 +377,7 @@ export function SearchScreen({ visible, onClose }: SearchScreenProps) {
         <Text className='text-xl font-semibold text-gray-800 ml-3'>
           <TranslatedText>Search</TranslatedText>
         </Text>
+        <View className="w-9 h-9"/>
       </View>
 
       {/* Search Input */}
