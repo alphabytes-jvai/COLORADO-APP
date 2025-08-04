@@ -55,7 +55,7 @@ export default function MainLayout() {
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].background,
           height: 95,
-          paddingBottom: 10,
+          paddingBottom: 8,
           paddingTop: 20,
           borderTopWidth: 0,
         },

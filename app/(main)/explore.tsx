@@ -581,7 +581,7 @@ export default function ExploreScreen() {
         )}
 
         {/* Bottom padding */}
-        <View className='h-20' />
+        <View className='h-5' />
       </ScrollView>
     </SafeAreaView>
   );

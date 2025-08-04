@@ -249,7 +249,7 @@ export default function HomeScreen() {
           />
 
           {/* Bottom Padding for Tab Bar */}
-          <View className='h-20' />
+          <View className='h-5' />
         </ScrollView>
       </SafeAreaView>
 

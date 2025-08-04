@@ -366,7 +366,7 @@ export function SearchScreen({ visible, onClose }: SearchScreenProps) {
     router.push("/(main)/explore");
   };
   return (
-    <SafeAreaView className='flex-1 bg-gray-50'>
+    <SafeAreaView className='flex-1 bg-surface'>
       {/* Header */}
       <View className='flex flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100'>
         <View className='w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'>

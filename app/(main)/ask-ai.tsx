@@ -46,34 +46,56 @@ export default function AskAIScreen() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const { canUseFeature, useFeature, isPremium } = usePremium();
+  const premiumHook = usePremium();
+  const { canUseFeature, consumeFeature, isPremium, getFeatureUsage } =
+    premiumHook;
   const scrollRef = useRef<ScrollView>(null);
+  const textInputRef = useRef<TextInput>(null);
+  const [currentUsage, setCurrentUsage] = useState(0);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
-
+  // Load current usage on mount and when refreshTrigger changes
   useEffect(() => {
-    const showSubscription = Keyboard.addListener("keyboardDidShow", (e) => {
-      setKeyboardOffset(e.endCoordinates.height);
+    const loadUsage = async () => {
+      const usage = await getFeatureUsage(PREMIUM_FEATURES.AI_CHAT.id);
+      if (usage) {
+        // Check if it's a new day
+        const today = new Date().toDateString();
+        const lastUsedDate = new Date(usage.lastUsed).toDateString();
+
+        if (today === lastUsedDate) {
+          setCurrentUsage(usage.usageCount);
+        } else {
+          setCurrentUsage(0);
+        }
+      } else {
+        setCurrentUsage(0);
+      }
+    };
+
+    loadUsage();
+  }, [getFeatureUsage, refreshTrigger]);
+
+  // Auto-scroll to bottom when messages update
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [messages, isLoading]);
+
+  // Handle keyboard events
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
       setTimeout(() => {
         scrollRef.current?.scrollToEnd({ animated: true });
       }, 100);
     });
-    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardOffset(0);
-    });
 
     return () => {
       showSubscription.remove();
-      hideSubscription.remove();
     };
   }, []);
-
-  const checkAndUseFeature = async (): Promise<boolean> => {
-    if (!isPremium && !canUseFeature(PREMIUM_FEATURES.AI_CHAT.id)) {
-      return false;
-    }
-    return await useFeature(PREMIUM_FEATURES.AI_CHAT.id);
-  };
 
   const generateAIResponse = (question: string): string => {
     const lowerQuestion = question.toLowerCase();
@@ -102,10 +124,16 @@ export default function AskAIScreen() {
   };
 
   const sendMessage = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isLoading) return;
 
-    const canUse = await checkAndUseFeature();
-    if (!canUse) {
+    console.log("Attempting to send message...");
+    console.log("Current usage:", currentUsage);
+    console.log("Is premium:", isPremium);
+    console.log("Can use feature:", canUseFeature(PREMIUM_FEATURES.AI_CHAT.id));
+
+    // Check if user can use the feature BEFORE sending message
+    if (!isPremium && !canUseFeature(PREMIUM_FEATURES.AI_CHAT.id)) {
+      console.log("Opening premium modal - limit reached");
       setShowPremiumModal(true);
       return;
     }
@@ -121,21 +149,57 @@ export default function AskAIScreen() {
     setInputText("");
     setIsLoading(true);
 
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: generateAIResponse(userMessage.text),
-        isUser: false,
-        timestamp: new Date(),
-      };
+    // Blur the text input to dismiss keyboard
+    textInputRef.current?.blur();
 
-      setMessages((prev) => [...prev, aiResponse]);
+    try {
+      // Use the feature (increment usage count)
+      const featureUsed = await consumeFeature(PREMIUM_FEATURES.AI_CHAT.id);
+      if (!featureUsed) {
+        console.log("Feature usage failed - showing premium modal");
+        setShowPremiumModal(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Update current usage count
+      setCurrentUsage((prev) => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
+
+      setTimeout(() => {
+        const aiResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          text: generateAIResponse(userMessage.text),
+          isUser: false,
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, aiResponse]);
+        setIsLoading(false);
+      }, 1500);
+    } catch (error) {
+      console.error("Error using feature:", error);
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleSuggestedQuestion = (question: string) => {
+    console.log("Suggested question clicked");
+    console.log("Current usage:", currentUsage);
+    console.log("Can use feature:", canUseFeature(PREMIUM_FEATURES.AI_CHAT.id));
+
+    // Check if user can use the feature BEFORE setting the question
+    if (!isPremium && !canUseFeature(PREMIUM_FEATURES.AI_CHAT.id)) {
+      console.log("Opening premium modal from suggested question");
+      setShowPremiumModal(true);
+      return;
+    }
+
     setInputText(question);
+    // Focus the text input after setting the question
+    setTimeout(() => {
+      textInputRef.current?.focus();
+    }, 100);
   };
 
   const handleSubscribe = (plan: "monthly" | "yearly") => {
@@ -149,16 +213,16 @@ export default function AskAIScreen() {
       className={`flex-row mb-4 ${message.isUser ? "justify-end" : "justify-start"}`}
     >
       {!message.isUser && (
-        <View className='w-8 h-8 bg-primary rounded-full items-center justify-center mr-3 mt-1'>
-          <Bot size={16} color='white' />
+        <View className="w-9 h-9 bg-primary rounded-full items-center justify-center mr-3 mt-1">
+          <Bot size={20} color="white" />
         </View>
       )}
 
       <View
         className={`max-w-[80%] p-3 mt-4 ${
           message.isUser
-            ? "bg-primary ml-4 rounded-l-2xl rounded-br-2xl"
-            : "bg-gray-100 mr-4 rounded-r-2xl rounded-bl-2xl"
+            ? "bg-primary ml-4 rounded-l-lg rounded-br-lg"
+            : "bg-gray-100 mr-4 rounded-r-lg rounded-bl-lg"
         }`}
       >
         <Text
@@ -166,13 +230,13 @@ export default function AskAIScreen() {
             message.isUser ? "text-black" : "text-gray-800"
           }`}
         >
-          {message.text}
+          <TranslatedText>{message.text}</TranslatedText>
         </Text>
       </View>
 
       {message.isUser && (
-        <View className='w-8 h-8 bg-gray-600 rounded-full items-center justify-center ml-3 mt-1'>
-          <User size={16} color='white' />
+        <View className="w-9 h-9 bg-gray-600 rounded-full items-center justify-center ml-3 mt-1">
+          <User size={20} color="white" />
         </View>
       )}
     </View>
@@ -181,51 +245,64 @@ export default function AskAIScreen() {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
     Dimensions.get("window");
 
+  // Check if user can send messages
+  const canSendMessage =
+    isPremium || currentUsage < PREMIUM_FEATURES.AI_CHAT.maxFreeUsage;
+
+  console.log("Render - Can send message:", canSendMessage);
+  console.log("Render - Current usage:", currentUsage);
+  console.log(
+    "Render - Max free usage:",
+    PREMIUM_FEATURES.AI_CHAT.maxFreeUsage
+  );
+
   return (
-    <SafeAreaView className='flex-1 bg-surface/90'>
-      <View className='flex-1'>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
-          <View className='absolute -top-10 left-0 right-0'>
+    <SafeAreaView className="flex-1 bg-surface/90">
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <View className="flex-1">
+          <View className="absolute -top-16 left-0 right-0">
             <ImageBackground
               source={require("@/assets/images/top-cloud.png")}
               style={{
                 width: SCREEN_WIDTH,
                 height: SCREEN_HEIGHT * 0.3,
               }}
-              resizeMode='cover'
+              resizeMode="cover"
             />
           </View>
 
           {/* Header */}
-          <View className='flex-row items-center justify-between px-5 py-3'>
+          <View className="flex-row items-center justify-between px-5 py-3">
             <TouchableOpacity
               onPress={() => router.back()}
-              className='w-10 h-10 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]'
+              className="w-10 h-10 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]"
             >
-              <ChevronLeft size={24} color='#1F2937' />
+              <ChevronLeft size={24} color="#1F2937" />
             </TouchableOpacity>
-            <Text className='text-2xl font-bold text-black'>
+            <Text className="text-2xl font-bold text-black">
               <TranslatedText>Ask AI</TranslatedText>
             </Text>
-            <View className='w-9 h-9' />
+            <View className="w-9 h-9" />
           </View>
 
           {/* Messages */}
           <ScrollView
             ref={scrollRef}
-            className='flex-1 px-5 py-1'
-            contentContainerStyle={{ paddingBottom: keyboardOffset + 100 }}
+            className="flex-1 px-5 py-1"
+            contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
-            <View className='flex flex-col justify-between items-center px-5 mb-5'>
-              <Text className='text-2xl font-bold text-black'>
+            <View className="flex flex-col justify-between items-center px-5 mb-5">
+              <Text className="text-2xl font-bold text-black">
                 <Sparkles size={20} />{" "}
                 <TranslatedText>Assistance</TranslatedText>
               </Text>
-              <Text className='text-gray-600 text-sm mt-1'>
+              <Text className="text-gray-600 text-sm mt-1">
                 <TranslatedText>
                   Your Colorado exploration assistant
                 </TranslatedText>
@@ -235,12 +312,12 @@ export default function AskAIScreen() {
             {messages.map(renderMessage)}
 
             {isLoading && (
-              <View className='flex-row justify-start mb-4'>
-                <View className='w-8 h-8 bg-primary rounded-full items-center justify-center mr-3 mt-1'>
-                  <Bot size={16} color='white' />
+              <View className="flex-row justify-start mb-4">
+                <View className="w-8 h-8 bg-primary rounded-full items-center justify-center mr-3 mt-1">
+                  <Bot size={16} color="white" />
                 </View>
-                <View className='bg-gray-100 p-3 rounded-2xl'>
-                  <Text className='text-gray-600'>
+                <View className="bg-gray-100 p-3 rounded-lg">
+                  <Text className="text-gray-600">
                     <TranslatedText>Thinking...</TranslatedText>
                   </Text>
                 </View>
@@ -250,8 +327,8 @@ export default function AskAIScreen() {
 
           {/* Suggested Questions */}
           {messages.length === 1 && (
-            <View className='px-5 py-2'>
-              <Text className='text-sm font-medium text-gray-700 mb-3'>
+            <View className="px-5 py-2">
+              <Text className="text-sm font-medium text-gray-700 mb-3">
                 <TranslatedText>Try asking:</TranslatedText>
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -259,9 +336,9 @@ export default function AskAIScreen() {
                   <TouchableOpacity
                     key={index}
                     onPress={() => handleSuggestedQuestion(question)}
-                    className='bg-gray-100 px-4 py-2 rounded-full mr-3'
+                    className="bg-gray-100 px-4 py-2 rounded-full mr-3"
                   >
-                    <Text className='text-gray-700 text-sm'>
+                    <Text className="text-gray-700 text-sm">
                       <TranslatedText>{question}</TranslatedText>
                     </Text>
                   </TouchableOpacity>
@@ -270,43 +347,77 @@ export default function AskAIScreen() {
             </View>
           )}
 
-          {/* Input */}
-          <View className='px-5 py-4 bg-white border-t border-gray-100'>
-            <View className='flex-row items-center'>
+          {/* Input Bar */}
+          <View className="px-5 py-4 bg-white border-t border-gray-100">
+            {!canSendMessage && (
+              <View className="mb-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <Text className="text-orange-700 text-sm text-center">
+                  <TranslatedText>
+                    {`You've reached your free message limit (${currentUsage}/${PREMIUM_FEATURES.AI_CHAT.maxFreeUsage}). Upgrade to Premium to continue chatting!`}
+                  </TranslatedText>
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowPremiumModal(true)}
+                  className="mt-2 bg-orange-600 py-2 px-4 rounded-lg"
+                >
+                  <Text className="text-white text-center font-semibold">
+                    <TranslatedText>Upgrade Now</TranslatedText>
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <View className="flex-row items-center">
               <TextInput
+                ref={textInputRef}
                 value={inputText}
                 onChangeText={setInputText}
-                placeholder='Ask me anything about Colorado...'
-                placeholderTextColor='#9CA3AF'
-                className='flex-1 bg-gray-100 rounded-full px-4 py-3 mr-3 text-base'
+                placeholder={
+                  canSendMessage
+                    ? "Ask me anything about Colorado..."
+                    : "Upgrade to Premium to continue..."
+                }
+                placeholderTextColor="#9CA3AF"
+                className={`flex-1 bg-gray-100 rounded-base px-4 py-3 mr-3 text-base ${
+                  !canSendMessage ? "opacity-50" : ""
+                }`}
                 multiline
                 maxLength={500}
                 onSubmitEditing={sendMessage}
+                editable={canSendMessage}
+                returnKeyType="send"
+                blurOnSubmit={false}
               />
               <TouchableOpacity
                 onPress={sendMessage}
-                disabled={!inputText.trim() || isLoading}
+                disabled={!inputText.trim() || isLoading || !canSendMessage}
                 className={`w-12 h-12 rounded-full items-center justify-center ${
-                  inputText.trim() && !isLoading ? "bg-primary" : "bg-gray-300"
+                  inputText.trim() && !isLoading && canSendMessage
+                    ? "bg-primary"
+                    : "bg-gray-300"
                 }`}
               >
                 <Send
                   size={20}
-                  color={inputText.trim() && !isLoading ? "black" : "gray"}
+                  color={
+                    inputText.trim() && !isLoading && canSendMessage
+                      ? "black"
+                      : "gray"
+                  }
                 />
               </TouchableOpacity>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
 
         {/* Premium Modal */}
         <PremiumModal
           visible={showPremiumModal}
           onClose={() => setShowPremiumModal(false)}
           onSubscribe={handleSubscribe}
-          feature='AI Assistant'
+          feature="AI Assistant"
         />
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

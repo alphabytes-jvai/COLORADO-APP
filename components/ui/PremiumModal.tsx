@@ -1,19 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  Switch,
-  Dimensions,
-} from "react-native";
+import { View, Text, Modal, TouchableOpacity, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { X, Crown, Check } from "lucide-react-native";
 import { TranslatedText } from "./TranslatedText";
 import { Button } from "./Button";
-import { useTranslation } from "@/hooks/useTranslation";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface PremiumModalProps {
   visible: boolean;
@@ -28,13 +18,14 @@ export function PremiumModal({
   onSubscribe,
   feature = "premium features",
 }: PremiumModalProps) {
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
+    "yearly"
+  );
   const [freeTrialEnabled, setFreeTrialEnabled] = useState(true);
-  const { t } = useTranslation();
 
   const features = [
     "Offline Map Access",
-    "AI Assistant Guide", 
+    "AI Assistant Guide",
     "Seamless experience",
   ];
 
@@ -47,7 +38,7 @@ export function PremiumModal({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={() => {}} // Prevent closing
+      onRequestClose={onClose}
     >
       <SafeAreaView className="flex-1 bg-white">
         {/* Header */}

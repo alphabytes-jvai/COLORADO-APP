@@ -1,5 +1,4 @@
-// hooks/usePremium.ts
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -14,7 +13,7 @@ interface PremiumFeature {
 interface UsePremiumReturn {
   isPremium: boolean;
   canUseFeature: (featureId: string) => boolean;
-  useFeature: (featureId: string) => Promise<boolean>;
+  consumeFeature: (featureId: string) => Promise<boolean>;
   getFeatureUsage: (featureId: string) => Promise<PremiumFeature | null>;
   resetFeatureUsage: (featureId: string) => Promise<void>;
   subscriptionStatus: "free" | "trial" | "premium";
@@ -36,35 +35,35 @@ const STORAGE_KEYS = {
 
 export const usePremium = (): UsePremiumReturn => {
   const { user } = useAppStore();
-  const [isPremium, setIsPremium] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<
     "free" | "trial" | "premium"
-  >("trial");
+  >("free");
   const [trialDaysLeft, setTrialDaysLeft] = useState(0);
-  const [featureUsage, setFeatureUsage] = useState<Record<string, PremiumFeature>>({});
+  const [featureUsage, setFeatureUsage] = useState<
+    Record<string, PremiumFeature>
+  >({});
 
-  useEffect(() => {
-    loadPremiumStatus();
-    loadFeatureUsage();
-  }, [user]);
-
-  const loadPremiumStatus = async () => {
+  const loadPremiumStatus = useCallback(async () => {
     try {
-      const premiumStatus = await AsyncStorage.getItem(STORAGE_KEYS.PREMIUM_STATUS);
       const trialStart = await AsyncStorage.getItem(STORAGE_KEYS.TRIAL_START);
-      const subscriptionType = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_TYPE);
+      const subscriptionType = await AsyncStorage.getItem(
+        STORAGE_KEYS.SUBSCRIPTION_TYPE
+      );
 
       if (subscriptionType === "premium") {
-        setIsPremium(true);
+        setIsPremium(false);
         setSubscriptionStatus("premium");
       } else if (trialStart) {
         const trialStartDate = new Date(trialStart);
         const now = new Date();
-        const daysDiff = Math.floor((now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24));
+        const daysDiff = Math.floor(
+          (now.getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
         const daysLeft = Math.max(0, 7 - daysDiff);
 
         if (daysLeft > 0) {
-          setIsPremium(true);
+          setIsPremium(false);
           setSubscriptionStatus("trial");
           setTrialDaysLeft(daysLeft);
         } else {
@@ -73,111 +72,193 @@ export const usePremium = (): UsePremiumReturn => {
           setTrialDaysLeft(0);
         }
       } else {
-        setIsPremium(false);
-        setSubscriptionStatus("free");
+        // First time user - start trial
+        const now = new Date().toISOString();
+        await AsyncStorage.setItem(STORAGE_KEYS.TRIAL_START, now);
+        setIsPremium(true);
+        setSubscriptionStatus("trial");
+        setTrialDaysLeft(7);
       }
     } catch (error) {
       console.error("Error loading premium status:", error);
+      setIsPremium(false);
+      setSubscriptionStatus("free");
     }
-  };
+  }, []);
 
-  const loadFeatureUsage = async () => {
+  const loadFeatureUsage = useCallback(async () => {
     try {
       const usage = await AsyncStorage.getItem(STORAGE_KEYS.FEATURE_USAGE);
       if (usage) {
-        setFeatureUsage(JSON.parse(usage));
+        const parsedUsage = JSON.parse(usage);
+        setFeatureUsage(parsedUsage);
+        console.log("Loaded feature usage:", parsedUsage);
+      } else {
+        console.log("No stored feature usage found");
       }
     } catch (error) {
       console.error("Error loading feature usage:", error);
     }
-  };
+  }, []);
 
-  const saveFeatureUsage = async (usage: Record<string, PremiumFeature>) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEYS.FEATURE_USAGE, JSON.stringify(usage));
-      setFeatureUsage(usage);
-    } catch (error) {
-      console.error("Error saving feature usage:", error);
-    }
-  };
+  const saveFeatureUsage = useCallback(
+    async (usage: Record<string, PremiumFeature>) => {
+      try {
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.FEATURE_USAGE,
+          JSON.stringify(usage)
+        );
+        setFeatureUsage(usage);
+        console.log("Saved feature usage:", usage);
+      } catch (error) {
+        console.error("Error saving feature usage:", error);
+      }
+    },
+    []
+  );
 
-  const canUseFeature = (featureId: string): boolean => {
-    if (isPremium) return true;
+  useEffect(() => {
+    loadPremiumStatus();
+    loadFeatureUsage();
+  }, [user, loadPremiumStatus, loadFeatureUsage]);
 
-    const feature = Object.values(PREMIUM_FEATURES).find(f => f.id === featureId);
-    if (!feature) return false;
+  const canUseFeature = useCallback(
+    (featureId: string): boolean => {
+      console.log("canUseFeature called for:", featureId);
+      console.log("isPremium:", isPremium);
 
-    const usage = featureUsage[featureId];
-    if (!usage) return true;
+      if (isPremium) {
+        console.log("User is premium, can use feature");
+        return true;
+      }
 
-    // Reset daily usage
-    const today = new Date().toDateString();
-    const lastUsedDate = new Date(usage.lastUsed).toDateString();
-    
-    if (today !== lastUsedDate) {
-      return true;
-    }
+      const feature = Object.values(PREMIUM_FEATURES).find(
+        (f) => f.id === featureId
+      );
+      if (!feature) {
+        console.log("Feature not found:", featureId);
+        return false;
+      }
 
-    return usage.usageCount < feature.maxFreeUsage;
-  };
+      const usage = featureUsage[featureId];
+      console.log("Current feature usage:", usage);
 
-  const useFeature = async (featureId: string): Promise<boolean> => {
-    if (isPremium) return true;
+      if (!usage) {
+        console.log("No usage record found, can use feature");
+        return true;
+      }
 
-    const feature = Object.values(PREMIUM_FEATURES).find(f => f.id === featureId);
-    if (!feature) return false;
+      // Check if it's a new day
+      const today = new Date().toDateString();
+      const lastUsedDate = new Date(usage.lastUsed).toDateString();
+      console.log("Today:", today);
+      console.log("Last used:", lastUsedDate);
 
-    const today = new Date().toISOString();
-    const todayString = new Date().toDateString();
-    
-    let currentUsage = featureUsage[featureId];
-    
-    if (!currentUsage) {
-      currentUsage = {
-        id: featureId,
-        name: feature.name,
-        usageCount: 0,
-        maxFreeUsage: feature.maxFreeUsage,
-        lastUsed: today,
+      if (today !== lastUsedDate) {
+        console.log("New day, resetting usage count");
+        return true;
+      }
+
+      const canUse = usage.usageCount < feature.maxFreeUsage;
+      console.log(
+        `Usage: ${usage.usageCount}/${feature.maxFreeUsage}, can use: ${canUse}`
+      );
+      return canUse;
+    },
+    [isPremium, featureUsage]
+  );
+
+  const consumeFeature = useCallback(
+    async (featureId: string): Promise<boolean> => {
+      console.log("useFeature called for:", featureId);
+
+      if (isPremium) {
+        console.log("User is premium, feature used successfully");
+        return true;
+      }
+
+      const feature = Object.values(PREMIUM_FEATURES).find(
+        (f) => f.id === featureId
+      );
+      if (!feature) {
+        console.log("Feature not found:", featureId);
+        return false;
+      }
+
+      const today = new Date().toISOString();
+      const todayString = new Date().toDateString();
+
+      let currentUsage = featureUsage[featureId];
+      console.log("Current usage before increment:", currentUsage);
+
+      if (!currentUsage) {
+        currentUsage = {
+          id: featureId,
+          name: feature.name,
+          usageCount: 0,
+          maxFreeUsage: feature.maxFreeUsage,
+          lastUsed: today,
+        };
+        console.log("Created new usage record:", currentUsage);
+      }
+
+      // Check if it's a new day and reset if needed
+      const lastUsedDate = new Date(currentUsage.lastUsed).toDateString();
+      if (todayString !== lastUsedDate) {
+        console.log("New day detected, resetting usage count");
+        currentUsage.usageCount = 0;
+      }
+
+      // Check if user has exceeded limit
+      if (currentUsage.usageCount >= feature.maxFreeUsage) {
+        console.log(
+          `Usage limit exceeded: ${currentUsage.usageCount}/${feature.maxFreeUsage}`
+        );
+        return false;
+      }
+
+      // Increment usage count
+      currentUsage.usageCount += 1;
+      currentUsage.lastUsed = today;
+      console.log("Updated usage:", currentUsage);
+
+      const updatedUsage = {
+        ...featureUsage,
+        [featureId]: currentUsage,
       };
-    }
 
-    // Reset daily usage
-    const lastUsedDate = new Date(currentUsage.lastUsed).toDateString();
-    if (todayString !== lastUsedDate) {
-      currentUsage.usageCount = 0;
-    }
+      await saveFeatureUsage(updatedUsage);
+      console.log(
+        "Feature used successfully, new count:",
+        currentUsage.usageCount
+      );
+      return true;
+    },
+    [isPremium, featureUsage, saveFeatureUsage]
+  );
 
-    if (currentUsage.usageCount >= feature.maxFreeUsage) {
-      return false;
-    }
+  const getFeatureUsage = useCallback(
+    async (featureId: string): Promise<PremiumFeature | null> => {
+      const usage = featureUsage[featureId];
+      console.log("getFeatureUsage for", featureId, ":", usage);
+      return usage || null;
+    },
+    [featureUsage]
+  );
 
-    currentUsage.usageCount += 1;
-    currentUsage.lastUsed = today;
-
-    const updatedUsage = {
-      ...featureUsage,
-      [featureId]: currentUsage,
-    };
-
-    await saveFeatureUsage(updatedUsage);
-    return true;
-  };
-
-  const getFeatureUsage = async (featureId: string): Promise<PremiumFeature | null> => {
-    return featureUsage[featureId] || null;
-  };
-
-  const resetFeatureUsage = async (featureId: string): Promise<void> => {
-    const updatedUsage = { ...featureUsage };
-    delete updatedUsage[featureId];
-    await saveFeatureUsage(updatedUsage);
-  };
+  const resetFeatureUsage = useCallback(
+    async (featureId: string): Promise<void> => {
+      const updatedUsage = { ...featureUsage };
+      delete updatedUsage[featureId];
+      await saveFeatureUsage(updatedUsage);
+    },
+    [featureUsage, saveFeatureUsage]
+  );
 
   return {
     isPremium,
     canUseFeature,
-    useFeature,
+    consumeFeature,
     getFeatureUsage,
     resetFeatureUsage,
     subscriptionStatus,
