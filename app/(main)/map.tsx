@@ -1,12 +1,24 @@
 // app/(main)/map.tsx
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ImageBackground,
+  Dimensions,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { PremiumModal } from "@/components/ui/PremiumModal";
 import { usePremium, PREMIUM_FEATURES } from "@/hooks/usePremium";
-import { Navigation, MapPin, ChevronRight } from "lucide-react-native";
+import {
+  Navigation,
+  MapPin,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react-native";
+import { StatusBar } from "expo-status-bar";
 
 export default function MapScreen() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -69,7 +81,7 @@ export default function MapScreen() {
       <TouchableOpacity
         key={option.id}
         onPress={option.onPress}
-        className="bg-green-50 rounded-2xl p-4 mb-4 flex-row items-center justify-between"
+        className="bg-green-50 rounded-base p-4 mb-5 flex-row items-center justify-between"
         activeOpacity={0.7}
       >
         <View className="flex-row items-center flex-1">
@@ -90,19 +102,43 @@ export default function MapScreen() {
     );
   };
 
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
+    Dimensions.get("window");
+
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 px-5 py-6">
-        {/* Header */}
-        <Text className="text-2xl font-bold text-black mb-8">
+      <StatusBar style="auto" />
+      <View className="absolute -top-16 left-0 right-0">
+        <ImageBackground
+          source={require("@/assets/images/top-cloud.png")}
+          style={{
+            width: SCREEN_WIDTH,
+            height: SCREEN_HEIGHT * 0.35,
+          }}
+          resizeMode="cover"
+        />
+      </View>
+
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-5 py-3">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="w-10 h-10 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]"
+        >
+          <ChevronLeft size={24} color="#1F2937" />
+        </TouchableOpacity>
+        <Text className="text-2xl font-bold text-black">
           <TranslatedText>Map & Navigate</TranslatedText>
         </Text>
+        <View className="w-9 h-9" />
+      </View>
 
+      <View className="flex-1 px-5 mt-5">
         {/* Map Options */}
         <View>{mapOptions.map(renderMapOption)}</View>
 
         {/* Info Text */}
-        <View className="mt-8 p-4 bg-blue-50 rounded-xl">
+        <View className="mt-5 p-4 bg-blue-50 rounded-base">
           <Text className="text-blue-800 text-sm text-center">
             <TranslatedText>
               Access detailed maps and navigation features to explore
