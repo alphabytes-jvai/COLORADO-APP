@@ -20,6 +20,8 @@ import MapView, {
 } from "react-native-maps";
 import * as Location from "expo-location";
 import { TranslatedText } from "@/components/ui/TranslatedText";
+import { MockDataService } from "@/services/mockDataService";
+import type { AllDataStructure } from "@/types/homeTypes";
 import {
   MapPin,
   ArrowLeft,
@@ -30,83 +32,8 @@ import {
   Menu,
   X,
   Route,
+  ArrowUpRight,
 } from "lucide-react-native";
-
-
-// Enhanced location data with more details
-const mockLocations = [
-  {
-    id: "1",
-    name: "Rocky Mountain National Park",
-    address: "1000 US Hwy 36, Estes Park, CO 80517",
-    latitude: 40.3428,
-    longitude: -105.6836,
-    type: "National Park",
-    description: "Breathtaking mountain vistas and wildlife",
-    rating: 4.8,
-  },
-  {
-    id: "2",
-    name: "Garden of the Gods",
-    address: "1805 N 30th St, Colorado Springs, CO 80904",
-    latitude: 38.8719,
-    longitude: -104.8761,
-    type: "Park",
-    description: "Stunning red rock formations",
-    rating: 4.9,
-  },
-  {
-    id: "3",
-    name: "Red Rocks Amphitheatre",
-    address: "18300 W Alameda Pkwy, Morrison, CO 80465",
-    latitude: 39.6654,
-    longitude: -105.2057,
-    type: "Entertainment",
-    description: "World-famous outdoor concert venue",
-    rating: 4.7,
-  },
-  {
-    id: "4",
-    name: "Mesa Verde National Park",
-    address: "Mesa Verde National Park, CO 81330",
-    latitude: 37.2308,
-    longitude: -108.4618,
-    type: "National Park",
-    description: "Ancient cliff dwellings and archaeological sites",
-    rating: 4.6,
-  },
-  {
-    id: "5",
-    name: "Pikes Peak",
-    address: "Pikes Peak, Colorado Springs, CO",
-    latitude: 38.8405,
-    longitude: -105.0442,
-    type: "Mountain",
-    description: "America's Mountain - 14,115 feet elevation",
-    rating: 4.8,
-  },
-  {
-    id: "6",
-    name: "Great Sand Dunes National Park",
-    address: "11999 State Highway 150, Mosca, CO 81146",
-    latitude: 37.7916,
-    longitude: -105.5943,
-    type: "National Park",
-    description: "North America's tallest sand dunes",
-    rating: 4.5,
-  },
-];
-
-interface LocationType {
-  id: string;
-  name: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  type: string;
-  description?: string;
-  rating?: number;
-}
 
 interface DirectionStep {
   latitude: number;
@@ -115,24 +42,44 @@ interface DirectionStep {
 
 export default function ExploreNavigateScreen() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredLocations, setFilteredLocations] = useState(mockLocations);
-  const [selectedLocation, setSelectedLocation] = useState<LocationType>(
-    mockLocations[2]
-  ); // Red Rocks as default
+  const [filteredLocations, setFilteredLocations] = useState<
+    AllDataStructure[]
+  >([]);
+  const [allLocations, setAllLocations] = useState<AllDataStructure[]>([]);
+  const [, setSelectedLocation] = useState<AllDataStructure | null>(null);
+  const [destinationLocation, setDestinationLocation] =
+    useState<AllDataStructure | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [userLocation, setUserLocation] =
     useState<Location.LocationObject | null>(null);
   const [mapRegion, setMapRegion] = useState<Region>({
-    latitude: 39.6654,
-    longitude: -105.2057,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
+    latitude: 39.5501,
+    longitude: -105.7821,
+    latitudeDelta: 2.5,
+    longitudeDelta: 2.5,
   });
   const [routeCoordinates, setRouteCoordinates] = useState<DirectionStep[]>([]);
   const [isNavigating, setIsNavigating] = useState(false);
   const [navigationDistance, setNavigationDistance] = useState<string>("");
   const [navigationDuration, setNavigationDuration] = useState<string>("");
+  const [currentAddress, setCurrentAddress] = useState<string>(
+    "Getting your location..."
+  );
   const mapRef = useRef<MapView>(null);
+
+  // Load unified data on component mount
+  useEffect(() => {
+    const locations = MockDataService.getMapLocations();
+    setAllLocations(locations);
+    setFilteredLocations(locations);
+
+    // Set default selected location (first featured location)
+    const defaultLocation =
+      locations.find((loc) => loc.isFeatured) || locations[0];
+    if (defaultLocation) {
+      setSelectedLocation(defaultLocation);
+    }
+  }, []);
 
   // Request location permissions and get user location
   useEffect(() => {
@@ -151,8 +98,27 @@ export default function ExploreNavigateScreen() {
           accuracy: Location.Accuracy.High,
         });
         setUserLocation(location);
+
+        // Get current address
+        try {
+          const reverseGeocode = await Location.reverseGeocodeAsync({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          });
+
+          if (reverseGeocode.length > 0) {
+            const address = reverseGeocode[0];
+            const formattedAddress =
+              `${address.streetNumber || ""} ${address.street || ""}, ${address.city || ""} ${address.postalCode || ""}`.trim();
+            setCurrentAddress(formattedAddress || "Current Location");
+          }
+        } catch (error) {
+          console.error("Error getting address:", error);
+          setCurrentAddress("Current Location");
+        }
       } catch (error) {
         console.error("Error getting location:", error);
+        setCurrentAddress("Location unavailable");
         Alert.alert("Error", "Unable to get your current location");
       }
     })();
@@ -161,20 +127,24 @@ export default function ExploreNavigateScreen() {
   // Filter locations based on search query
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredLocations(mockLocations);
+      setFilteredLocations(allLocations);
     } else {
-      const filtered = mockLocations.filter(
-        (location) =>
-          location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          location.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          location.description
-            ?.toLowerCase()
-            .includes(searchQuery.toLowerCase())
+      const searchResults = MockDataService.searchContent(searchQuery);
+      const allResults = [
+        ...searchResults.locations,
+        ...searchResults.recommendations,
+        ...searchResults.hiking,
+        ...searchResults.travels,
+      ];
+
+      // Remove duplicates based on ID
+      const uniqueResults = allResults.filter(
+        (item, index, self) => self.findIndex((t) => t.id === item.id) === index
       );
-      setFilteredLocations(filtered);
+
+      setFilteredLocations(uniqueResults);
     }
-  }, [searchQuery]);
+  }, [searchQuery, allLocations]);
 
   // Calculate distance between two points
   const calculateDistance = (
@@ -183,61 +153,65 @@ export default function ExploreNavigateScreen() {
     lat2: number,
     lon2: number
   ): number => {
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    return MockDataService.calculateDistance(lat1, lon1, lat2, lon2);
   };
 
-  // Generate mock route coordinates (in real app, use Google Directions API)
+  // Generate mock route coordinates
   const generateRouteCoordinates = (
     start: { latitude: number; longitude: number },
     end: { latitude: number; longitude: number }
   ): DirectionStep[] => {
-    const steps = 10;
+    const steps = 20;
     const coordinates: DirectionStep[] = [];
 
     for (let i = 0; i <= steps; i++) {
       const ratio = i / steps;
-      const latitude = start.latitude + (end.latitude - start.latitude) * ratio;
+      // Add some curve to the route to make it look more realistic
+      const curveFactor = Math.sin(ratio * Math.PI) * 0.01;
+      const latitude =
+        start.latitude + (end.latitude - start.latitude) * ratio + curveFactor;
       const longitude =
-        start.longitude + (end.longitude - start.longitude) * ratio;
+        start.longitude +
+        (end.longitude - start.longitude) * ratio +
+        curveFactor;
       coordinates.push({ latitude, longitude });
     }
 
     return coordinates;
   };
 
-  const handleLocationSelect = (location: LocationType) => {
+  const handleLocationSelect = (location: AllDataStructure) => {
+    setDestinationLocation(location);
     setSelectedLocation(location);
     setIsSearching(false);
     setSearchQuery("");
-    setIsNavigating(false);
-    setRouteCoordinates([]);
 
     // Animate to selected location
-    const newRegion = {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      latitudeDelta: 0.02,
-      longitudeDelta: 0.02,
-    };
-    setMapRegion(newRegion);
-    mapRef.current?.animateToRegion(newRegion, 1000);
+    if (location.latitude && location.longitude) {
+      const newRegion = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      };
+      setMapRegion(newRegion);
+      mapRef.current?.animateToRegion(newRegion, 1000);
+    }
   };
 
-  const handleGetDirections = async () => {
-    if (!selectedLocation || !userLocation) {
+  const handleSetDirection = async () => {
+    if (!destinationLocation || !userLocation) {
       Alert.alert(
         "Location Required",
-        "Unable to get directions. Please make sure location services are enabled."
+        "Please select a destination and make sure location services are enabled."
+      );
+      return;
+    }
+
+    if (!destinationLocation.latitude || !destinationLocation.longitude) {
+      Alert.alert(
+        "Error",
+        "Selected destination doesn't have valid coordinates."
       );
       return;
     }
@@ -251,11 +225,11 @@ export default function ExploreNavigateScreen() {
       };
 
       const end = {
-        latitude: selectedLocation.latitude,
-        longitude: selectedLocation.longitude,
+        latitude: destinationLocation.latitude,
+        longitude: destinationLocation.longitude,
       };
 
-      // Generate route coordinates (in real app, use Google Directions API)
+      // Generate route coordinates
       const route = generateRouteCoordinates(start, end);
       setRouteCoordinates(route);
 
@@ -268,7 +242,7 @@ export default function ExploreNavigateScreen() {
       );
 
       setNavigationDistance(`${distance.toFixed(1)} km`);
-      setNavigationDuration(`${Math.round(distance * 1.5)} min`); // Rough estimate
+      setNavigationDuration(`${Math.round(distance * 1.2)} min`);
 
       // Fit the route in view
       const coordinates = [start, end];
@@ -276,7 +250,7 @@ export default function ExploreNavigateScreen() {
         edgePadding: {
           top: 100,
           right: 50,
-          bottom: 300, // Account for bottom card
+          bottom: 400,
           left: 50,
         },
         animated: true,
@@ -284,7 +258,7 @@ export default function ExploreNavigateScreen() {
 
       Alert.alert(
         "Navigation Started",
-        `Route calculated: ${distance.toFixed(1)} km, estimated ${Math.round(distance * 1.5)} minutes`
+        `Route to ${destinationLocation.name}: ${distance.toFixed(1)} km, estimated ${Math.round(distance * 1.2)} minutes`
       );
     } catch (error) {
       console.error("Error calculating route:", error);
@@ -299,17 +273,15 @@ export default function ExploreNavigateScreen() {
     setNavigationDistance("");
     setNavigationDuration("");
 
-    // Return to selected location view
-    if (selectedLocation) {
-      const newRegion = {
-        latitude: selectedLocation.latitude,
-        longitude: selectedLocation.longitude,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-      };
-      setMapRegion(newRegion);
-      mapRef.current?.animateToRegion(newRegion, 1000);
-    }
+    // Return to Colorado overview
+    const defaultRegion = {
+      latitude: 39.5501,
+      longitude: -105.7821,
+      latitudeDelta: 2.5,
+      longitudeDelta: 2.5,
+    };
+    setMapRegion(defaultRegion);
+    mapRef.current?.animateToRegion(defaultRegion, 1000);
   };
 
   const handleMyLocation = async () => {
@@ -332,17 +304,17 @@ export default function ExploreNavigateScreen() {
       setMapRegion(newRegion);
       mapRef.current?.animateToRegion(newRegion, 1000);
     } catch (error) {
-      console.log("Error location", error)
+      console.error("Error getting location:", error);
       Alert.alert("Error", "Unable to get your current location");
     }
   };
 
   const handleResetView = () => {
     const defaultRegion = {
-      latitude: 39.6654,
-      longitude: -105.2057,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
+      latitude: 39.5501,
+      longitude: -105.7821,
+      latitudeDelta: 2.5,
+      longitudeDelta: 2.5,
     };
     setMapRegion(defaultRegion);
     mapRef.current?.animateToRegion(defaultRegion, 1000);
@@ -350,11 +322,22 @@ export default function ExploreNavigateScreen() {
     setRouteCoordinates([]);
   };
 
-  const handleMarkerPress = (location: LocationType) => {
-    handleLocationSelect(location);
+  const handleMarkerPress = (location: AllDataStructure) => {
+    setDestinationLocation(location);
+    setSelectedLocation(location);
+    if (location.latitude && location.longitude) {
+      const newRegion = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      };
+      setMapRegion(newRegion);
+      mapRef.current?.animateToRegion(newRegion, 1000);
+    }
   };
 
-  const renderLocationItem = ({ item }: { item: LocationType }) => (
+  const renderLocationItem = ({ item }: { item: AllDataStructure }) => (
     <TouchableOpacity
       onPress={() => handleLocationSelect(item)}
       className="p-4 border-b border-gray-100 bg-white"
@@ -370,10 +353,10 @@ export default function ExploreNavigateScreen() {
             className="font-semibold text-black text-base"
             numberOfLines={1}
           >
-            {item.name}
+            {item.name || item.title}
           </Text>
           <Text className="text-sm text-gray-600 mt-1" numberOfLines={2}>
-            {item.address}
+            {item.address || item.location}
           </Text>
           {item.description && (
             <Text className="text-xs text-gray-500 mt-1" numberOfLines={1}>
@@ -398,44 +381,7 @@ export default function ExploreNavigateScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
-      <StatusBar barStyle="light-content" backgroundColor="#22c55e" />
-
-      {/* Header */}
-      <View className="bg-green-500 pt-4 pb-4 px-4" style={styles.header}>
-        <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={24} color="white" />
-          </TouchableOpacity>
-          <Text className="text-white text-lg font-semibold">
-            <TranslatedText>Explore & Navigate</TranslatedText>
-          </Text>
-          <TouchableOpacity className="p-2">
-            <Menu size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Search Bar */}
-        <View
-          className="bg-white rounded-lg flex-row items-center px-3 py-2"
-          style={styles.searchBar}
-        >
-          <Search size={20} color="#666" />
-          <TextInput
-            className="flex-1 ml-3 text-black"
-            placeholder="Search places..."
-            placeholderTextColor="#999"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFocus={() => setIsSearching(true)}
-            style={styles.searchInput}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <X size={20} color="#666" />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
 
       {/* Map Container */}
       <View className="flex-1" style={styles.mapContainer}>
@@ -448,26 +394,26 @@ export default function ExploreNavigateScreen() {
           showsUserLocation={true}
           showsMyLocationButton={false}
           showsCompass={false}
-          showsScale={true}
+          showsScale={false}
           showsBuildings={true}
           showsTraffic={false}
           loadingEnabled={true}
           mapType="standard"
-          onPress={() => setIsSearching(false)} // Close search when map is pressed
+          onPress={() => setIsSearching(false)}
         >
           {/* Location Markers */}
-          {mockLocations.map((location) => (
+          {allLocations.map((location) => (
             <Marker
               key={location.id}
               coordinate={{
-                latitude: location.latitude,
-                longitude: location.longitude,
+                latitude: location.latitude || 0,
+                longitude: location.longitude || 0,
               }}
-              title={location.name}
+              title={location.name || location.title}
               description={location.description || location.address}
               onPress={() => handleMarkerPress(location)}
               pinColor={
-                selectedLocation.id === location.id ? "#ef4444" : "#22c55e"
+                destinationLocation?.id === location.id ? "#ef4444" : "#22c55e"
               }
             />
           ))}
@@ -476,20 +422,54 @@ export default function ExploreNavigateScreen() {
           {routeCoordinates.length > 0 && (
             <Polyline
               coordinates={routeCoordinates}
-              strokeWidth={4}
-              strokeColor="#3b82f6"
+              strokeWidth={6}
+              strokeColor="#22c55e"
               lineJoin="round"
               lineCap="round"
             />
           )}
         </MapView>
 
+        {/* Header - Transparent overlay on top of map */}
+        <View style={styles.headerOverlay}>
+          <View className="flex-row items-center justify-between mb-4">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="p-2 bg-white rounded-full shadow-md"
+            >
+              <ArrowLeft size={24} color="#1f2937" />
+            </TouchableOpacity>
+            <Text className="text-gray-900 text-lg font-semibold">
+              <TranslatedText>Navigate</TranslatedText>
+            </Text>
+            <TouchableOpacity className="p-2 bg-white rounded-full shadow-md">
+              <Menu size={24} color="#1f2937" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Search Bar */}
+          <View className="bg-white rounded-lg flex-row items-center px-3 py-3 shadow-sm border border-gray-200">
+            <Search size={20} color="#666" />
+            <TextInput
+              className="flex-1 ml-3 text-black"
+              placeholder="Search destinations..."
+              placeholderTextColor="#999"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onFocus={() => setIsSearching(true)}
+              style={styles.searchInput}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <X size={20} color="#666" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
         {/* Search Results Overlay */}
         {isSearching && (
-          <View
-            className="absolute left-4 right-4 bg-white rounded-lg shadow-lg"
-            style={[styles.searchResults, { top: 20, maxHeight: 300 }]}
-          >
+          <View style={styles.searchResults}>
             <FlatList
               data={filteredLocations}
               keyExtractor={(item) => item.id}
@@ -507,17 +487,17 @@ export default function ExploreNavigateScreen() {
         )}
 
         {/* Map Controls */}
-        <View className="absolute right-4 space-y-3" style={styles.mapControls}>
+        <View style={styles.mapControls}>
           <TouchableOpacity
             onPress={handleMyLocation}
-            className="bg-white p-3 rounded-lg shadow-lg"
+            className="bg-white p-3 rounded-full shadow-lg border border-gray-200 mb-3"
             style={styles.controlButton}
           >
             <Locate size={20} color="#22c55e" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleResetView}
-            className="bg-white p-3 rounded-lg shadow-lg"
+            className="bg-white p-3 rounded-full shadow-lg border border-gray-200"
             style={styles.controlButton}
           >
             <RotateCcw size={20} color="#22c55e" />
@@ -526,25 +506,22 @@ export default function ExploreNavigateScreen() {
 
         {/* Navigation Status */}
         {isNavigating && (
-          <View
-            className="absolute top-4 left-4 right-4"
-            style={styles.navigationStatus}
-          >
-            <View className="bg-blue-500 rounded-lg p-3 flex-row items-center justify-between">
+          <View style={styles.navigationStatus}>
+            <View className="bg-green-500 rounded-lg p-3 flex-row items-center justify-between shadow-lg">
               <View className="flex-row items-center flex-1">
                 <Route size={16} color="white" />
                 <View className="ml-2">
                   <Text className="text-white font-semibold text-sm">
-                    Navigating to {selectedLocation.name}
+                    Navigating to {destinationLocation?.name}
                   </Text>
-                  <Text className="text-blue-100 text-xs">
+                  <Text className="text-green-100 text-xs">
                     {navigationDistance} • {navigationDuration}
                   </Text>
                 </View>
               </View>
               <TouchableOpacity
                 onPress={handleStopNavigation}
-                className="bg-blue-600 rounded p-2 ml-2"
+                className="bg-green-600 rounded p-2 ml-2"
               >
                 <X size={16} color="white" />
               </TouchableOpacity>
@@ -552,114 +529,112 @@ export default function ExploreNavigateScreen() {
           </View>
         )}
 
-        {/* Location Info Card */}
-        {selectedLocation && (
-          <View
-            className="absolute bottom-4 left-4 right-4"
-            style={styles.locationCard}
-          >
-            <View className="bg-white rounded-xl p-4 shadow-lg">
-              <View className="flex-row items-start mb-3">
-                <View className="bg-red-100 p-2 rounded-lg mr-3">
-                  <MapPin size={16} color="#ef4444" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base font-semibold text-black mb-1">
-                    {selectedLocation.name}
-                  </Text>
-                  <Text className="text-sm text-gray-600 mb-2">
-                    {selectedLocation.address}
-                  </Text>
-                  {selectedLocation.description && (
-                    <Text className="text-xs text-gray-500 mb-2">
-                      {selectedLocation.description}
-                    </Text>
-                  )}
-                  <View className="flex-row items-center">
-                    <Text className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded mr-2">
-                      {selectedLocation.type}
-                    </Text>
-                    {selectedLocation.rating && (
-                      <View className="flex-row items-center">
-                        <Text className="text-xs text-orange-500 mr-1">★</Text>
-                        <Text className="text-xs text-gray-600">
-                          {selectedLocation.rating}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
+        {/* Bottom Navigation Card - Matching the image design */}
+        <View style={styles.bottomCard}>
+          <View className="bg-white rounded-t-3xl px-4 pt-6 pb-8 shadow-2xl">
+            {/* Current Location with orange pin */}
+            <View className="flex-row items-center mb-4 p-3 bg-gray-50 rounded-lg">
+              <View className="bg-orange-500 p-2 rounded-full mr-3">
+                <MapPin size={16} color="white" />
               </View>
-
-              {!isNavigating ? (
-                <TouchableOpacity
-                  onPress={handleGetDirections}
-                  className="bg-green-500 rounded-lg py-3 flex-row items-center justify-center"
-                  style={styles.directionsButton}
-                >
-                  <Navigation2 size={16} color="white" />
-                  <Text className="text-white font-semibold ml-2">
-                    <TranslatedText>Get Directions</TranslatedText>
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={handleStopNavigation}
-                  className="bg-red-500 rounded-lg py-3 flex-row items-center justify-center"
-                  style={styles.directionsButton}
-                >
-                  <X size={16} color="white" />
-                  <Text className="text-white font-semibold ml-2">
-                    <TranslatedText>Stop Navigation</TranslatedText>
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <Text
+                className="flex-1 text-gray-900 font-medium"
+                numberOfLines={1}
+              >
+                {currentAddress}
+              </Text>
             </View>
+
+            {/* Destination with green pin */}
+            <TouchableOpacity
+              onPress={() => setIsSearching(true)}
+              className="flex-row items-center mb-6 p-3 border border-gray-200 rounded-lg"
+            >
+              <View className="bg-green-500 p-2 rounded-full mr-3">
+                <MapPin size={16} color="white" />
+              </View>
+              <View className="flex-1">
+                {destinationLocation ? (
+                  <Text className="text-gray-900 font-medium" numberOfLines={1}>
+                    {destinationLocation.name || destinationLocation.title}
+                  </Text>
+                ) : (
+                  <Text className="text-gray-500">
+                    <TranslatedText>Destination</TranslatedText>
+                  </Text>
+                )}
+              </View>
+              <ArrowUpRight size={20} color="#666" />
+            </TouchableOpacity>
+
+            {/* Set Direction Button */}
+            <TouchableOpacity
+              onPress={handleSetDirection}
+              disabled={!destinationLocation || !userLocation}
+              className={`rounded-xl py-4 flex-row items-center justify-center ${
+                destinationLocation && userLocation
+                  ? "bg-green-500"
+                  : "bg-gray-300"
+              }`}
+              style={styles.setDirectionButton}
+            >
+              <Navigation2 size={20} color="white" />
+              <Text className="text-white font-semibold text-lg ml-2">
+                <TranslatedText>Set Direction</TranslatedText>
+              </Text>
+            </TouchableOpacity>
           </View>
-        )}
+        </View>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  searchBar: {
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  searchInput: {
-    fontSize: 16,
-  },
-  searchResults: {
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    zIndex: 1000,
-  },
-  locationItem: {
-    borderLeftWidth: 3,
-    borderLeftColor: "#22c55e",
-  },
   mapContainer: {
     flex: 1,
   },
   map: {
     flex: 1,
   },
+  headerOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    zIndex: 1000,
+  },
+  searchInput: {
+    fontSize: 16,
+  },
+  searchResults: {
+    position: "absolute",
+    top: 140,
+    left: 16,
+    right: 16,
+    maxHeight: 300,
+    backgroundColor: "white",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 999,
+  },
+  locationItem: {
+    borderLeftWidth: 3,
+    borderLeftColor: "#22c55e",
+  },
   mapControls: {
-    top: 20,
+    position: "absolute",
+    right: 16,
+    top: 200,
+    zIndex: 998,
   },
   controlButton: {
     elevation: 3,
@@ -669,25 +644,33 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   navigationStatus: {
+    position: "absolute",
+    top: 160,
+    left: 16,
+    right: 16,
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
-    zIndex: 999,
+    zIndex: 997,
   },
-  locationCard: {
-    elevation: 6,
+  bottomCard: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowRadius: 10,
   },
-  directionsButton: {
+  setDirectionButton: {
     elevation: 2,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 3,
   },
 });

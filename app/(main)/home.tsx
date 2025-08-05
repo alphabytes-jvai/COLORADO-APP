@@ -22,8 +22,7 @@ import { Bell } from "lucide-react-native";
 import { CategoryService } from "@/services/homeService";
 import type {
   Category,
-  ExploreItem,
-  RecommendedItem,
+  AllDataStructure,
   HeroSlide,
 } from "@/types/homeTypes";
 import { HeroSlider } from "@/components/main/HomeSections/HeroSlider";
@@ -39,8 +38,8 @@ export default function HomeScreen() {
 
   // Data from service
   const [categories, setCategories] = useState<Category[]>([]);
-  const [exploreItems, setExploreItems] = useState<ExploreItem[]>([]);
-  const [recommendedItems, setRecommendedItems] = useState<RecommendedItem[]>(
+  const [exploreItems, setExploreItems] = useState<AllDataStructure[]>([]);
+  const [recommendedItems, setRecommendedItems] = useState<AllDataStructure[]>(
     []
   );
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
@@ -80,7 +79,7 @@ export default function HomeScreen() {
     });
   };
 
-  const handleExploreItemPress = (item: ExploreItem) => {
+  const handleExploreItemPress = (item: AllDataStructure) => {
     console.log("Explore item pressed:", item.title);
     // Navigate to explore detail screen
     router.push({
@@ -96,7 +95,7 @@ export default function HomeScreen() {
     });
   };
 
-  const handleRecommendedItemPress = (item: RecommendedItem) => {
+  const handleRecommendedItemPress = (item: AllDataStructure) => {
     console.log("Recommended item pressed:", item.title);
     // Navigate to recommended detail screen
     router.push({

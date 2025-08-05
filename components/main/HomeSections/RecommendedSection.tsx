@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import type {
   RecommendedSectionProps,
-  RecommendedItem,
+  AllDataStructure,
 } from "@/types/homeTypes";
 
 export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
@@ -16,7 +16,7 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
   onSeeAllPress,
   containerClassName = "",
 }) => {
-  const handleItemPress = (item: RecommendedItem) => {
+  const handleItemPress = (item: AllDataStructure) => {
     if (onItemPress) {
       onItemPress(item);
     }
@@ -28,30 +28,38 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
     }
   };
 
-  const renderRecommendedItem = (item: RecommendedItem) => (
+  const renderRecommendedItem = (item: AllDataStructure) => (
     <TouchableOpacity
       key={item.id}
       onPress={() => handleItemPress(item)}
-      className='mr-4'
+      className="mr-4"
       activeOpacity={0.7}
       style={{ width: 160 }} // Fixed width matching the design
     >
       {/* Image Container */}
-      <View className='w-full h-32 rounded-2xl overflow-hidden mb-3'>
+      <View className="w-full h-32 rounded-2xl overflow-hidden mb-3">
         <Image
-          source={item.image}
-          className='w-full h-full'
-          resizeMode='cover'
+          source={
+            item.images && item.images.length > 0
+              ? item.images[0]
+              : require("@/assets/images/placeholder.png")
+          }
+          className="w-full h-full"
+          resizeMode="cover"
         />
       </View>
 
       {/* Text Content */}
-      <View className='px-1'>
-        <Text className='text-black font-bold text-lg mb-1 leading-tight'>
-          <TranslatedText>{item.title}</TranslatedText>
+      <View className="px-1">
+        <Text className="text-black font-bold text-lg mb-1 leading-tight">
+          <TranslatedText>
+            {(item?.title || item?.name || "").length > 12
+              ? (item?.title || item?.name || "").slice(0, 12) + "..."
+              : item?.title || item?.name || ""}
+          </TranslatedText>
         </Text>
-        <Text className='text-gray-400 text-sm font-normal'>
-          <TranslatedText>{item.dateRange}</TranslatedText>
+        <Text className="text-gray-400 text-sm font-normal">
+          <TranslatedText>{item.dateRange || ""}</TranslatedText>
         </Text>
       </View>
     </TouchableOpacity>
@@ -60,13 +68,13 @@ export const RecommendedSection: React.FC<RecommendedSectionProps> = ({
   const renderHeader = () => {
     if (!showTitle) return null;
     return (
-      <View className='flex-row items-center justify-between mb-4 px-5'>
-        <Text className='text-2xl font-bold text-black'>
+      <View className="flex-row items-center justify-between mb-4 px-5">
+        <Text className="text-2xl font-bold text-black">
           <TranslatedText>{title}</TranslatedText>
         </Text>
         {showSeeAll && (
           <TouchableOpacity onPress={handleSeeAllPress} activeOpacity={0.7}>
-            <Text className='text-primary font-semibold text-base'>
+            <Text className="text-green-500 font-semibold text-base">
               <TranslatedText>See All</TranslatedText>
             </Text>
           </TouchableOpacity>

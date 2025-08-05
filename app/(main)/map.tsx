@@ -92,7 +92,7 @@ export default function MapScreen() {
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.12,
               shadowRadius: 14.8,
-              elevation: 8, 
+              elevation: 8,
             }}
           >
             <IconComponent size={24} color={option.color} />
@@ -152,7 +152,9 @@ export default function MapScreen() {
           <Text className="text-blue-800 text-sm text-center">
             <TranslatedText>
               Access detailed maps and navigation features to explore
-              Colorado&apos;s best destinations.
+              Colorado&apos;s best destinations using our unified location
+              database with all attractions, national parks, and points of
+              interest.
             </TranslatedText>
           </Text>
         </View>
