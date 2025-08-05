@@ -246,14 +246,20 @@ export function PremiumModal({
     >
       <SafeAreaView className="flex-1 bg-white">
         {/* Header */}
-        <View className="flex-row items-center justify-between px-5 py-4">
+        <View className="flex-row-reverse items-center justify-between px-5 py-4">
           {showPaymentForm ? (
-            <TouchableOpacity onPress={goBack} className="p-2">
-              <X size={24} color="#666" />
+            <TouchableOpacity
+              onPress={goBack}
+              className="w-10 h-10 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]"
+            >
+              <X size={24} color="#FF0000" />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={handleClose} className="p-2">
-              <X size={24} color="#666" />
+            <TouchableOpacity
+              onPress={handleClose}
+              className="w-10 h-10 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]"
+            >
+              <X size={24} color="#FF0000" />
             </TouchableOpacity>
           )}
 

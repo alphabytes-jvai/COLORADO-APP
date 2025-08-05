@@ -1,4 +1,4 @@
-// services/categoryService.ts
+// services\homeService.ts
 import type {
   Category,
   ExploreItem,

@@ -52,7 +52,7 @@ export const usePremium = (): UsePremiumReturn => {
       );
 
       if (subscriptionType === "premium") {
-        setIsPremium(false);
+        setIsPremium(true);
         setSubscriptionStatus("premium");
       } else if (trialStart) {
         const trialStartDate = new Date(trialStart);
@@ -63,11 +63,11 @@ export const usePremium = (): UsePremiumReturn => {
         const daysLeft = Math.max(0, 7 - daysDiff);
 
         if (daysLeft > 0) {
-          setIsPremium(false);
+          setIsPremium(true);
           setSubscriptionStatus("trial");
           setTrialDaysLeft(daysLeft);
         } else {
-          setIsPremium(false);
+          setIsPremium(true);
           setSubscriptionStatus("free");
           setTrialDaysLeft(0);
         }

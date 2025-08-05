@@ -19,7 +19,11 @@
       "bundleIdentifier": "com.descubrelocolorado.app",
       "buildNumber": "1",
       "config": {
-        "googleMapsApiKey": "AIzaSyDEDGrZAJbXKFLXIeBTZ4OG_ykFISytlMw"
+        "googleMapsApiKey": "AIzaSyD8xDRBJQasHLzohG_hk8gmIDQQ6QGJYZE"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show your position on the map and provide directions to nearby places.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show your position on the map and provide directions to nearby places."
       }
     },
     "android": {
@@ -31,9 +35,14 @@
       "versionCode": 1,
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyDEDGrZAJbXKFLXIeBTZ4OG_ykFISytlMw"
+          "apiKey": "AIzaSyD8xDRBJQasHLzohG_hk8gmIDQQ6QGJYZE"
         }
-      }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -49,6 +58,12 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#F8F9FA"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
       ]
     ],

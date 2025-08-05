@@ -81,13 +81,23 @@ export default function MapScreen() {
       <TouchableOpacity
         key={option.id}
         onPress={option.onPress}
-        className="bg-green-50 rounded-base p-4 mb-5 flex-row items-center justify-between"
+        className="bg-primary-100 rounded-base p-4 mb-5 flex-row items-center justify-between"
         activeOpacity={0.7}
       >
         <View className="flex-row items-center flex-1">
-          <View className="w-12 h-12 bg-white rounded-full items-center justify-center mr-4">
+          <View
+            className="w-12 h-12 bg-white rounded-full items-center justify-center mr-4"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.12,
+              shadowRadius: 14.8,
+              elevation: 8, 
+            }}
+          >
             <IconComponent size={24} color={option.color} />
           </View>
+
           <View className="flex-1">
             <Text className="text-lg font-semibold text-black mb-1">
               <TranslatedText>{option.title}</TranslatedText>

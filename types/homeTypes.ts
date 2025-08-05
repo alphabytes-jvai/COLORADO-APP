@@ -37,6 +37,39 @@ export interface RecommendedItem {
   price?: number;
   rating?: number;
   isFeatured?: boolean;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+  [key: string]: any;
+}
+
+export interface AllDataStructure {
+  id: string;
+  name: string;
+  address?: string;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  eventCount?: number;
+  type?: string;
+  description?: string;
+  rating?: number;
+  dateRange?: string;
+  images?: any[];
+  phone?: string;
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    youtube?: string;
+    linkedin?: string;
+    [key: string]: any;
+  };
+  openingHours?: string;
+  priceLevel?: number;
+  categories?: string[];
+  [key: string]: any;
 }
 
 // Hero slide interface
