@@ -1,9 +1,86 @@
 // services/mockDataService.ts
 import type { AllDataStructure } from "@/types/homeTypes";
 
+interface OfflineRegionConfig {
+  id: string;
+  name: string;
+  coverage: string;
+  bounds: {
+    northeast: { latitude: number; longitude: number };
+    southwest: { latitude: number; longitude: number };
+  };
+  baseSize: number; // Base size in MB
+}
+
+interface OfflineDataCache {
+  [regionId: string]: {
+    locations: AllDataStructure[];
+    mapTiles: boolean;
+    lastUpdated: number;
+    size: number;
+  };
+}
+
 export class MockDataService {
-  // Unified data store for all sections with enhanced offline support
-  private static getUnifiedData(): AllDataStructure[] {
+  private static offlineCache: OfflineDataCache = {};
+  private static apiEndpoint = "https://api.yourapp.com"; // Replace with your actual API endpoint
+
+  // Predefined region configurations that work for any location data
+  private static regionConfigs: OfflineRegionConfig[] = [
+    {
+      id: "denver",
+      name: "Greater Denver Area",
+      coverage: "Denver, Boulder, Aurora, Lakewood",
+      bounds: {
+        northeast: { latitude: 40.1, longitude: -104.5 },
+        southwest: { latitude: 39.4, longitude: -105.3 },
+      },
+      baseSize: 120,
+    },
+    {
+      id: "colorado-springs",
+      name: "Colorado Springs Region",
+      coverage: "Colorado Springs, Manitou Springs, Fountain",
+      bounds: {
+        northeast: { latitude: 39.0, longitude: -104.6 },
+        southwest: { latitude: 38.7, longitude: -105.2 },
+      },
+      baseSize: 95,
+    },
+    {
+      id: "rocky-mountains",
+      name: "Rocky Mountain National Park",
+      coverage: "Estes Park, Grand Lake, Trail Ridge Road",
+      bounds: {
+        northeast: { latitude: 40.6, longitude: -105.4 },
+        southwest: { latitude: 40.1, longitude: -106.0 },
+      },
+      baseSize: 80,
+    },
+    {
+      id: "western-colorado",
+      name: "Western Colorado",
+      coverage: "Grand Junction, Aspen, Vail, Durango",
+      bounds: {
+        northeast: { latitude: 40.8, longitude: -106.0 },
+        southwest: { latitude: 37.0, longitude: -109.0 },
+      },
+      baseSize: 150,
+    },
+    {
+      id: "central-colorado",
+      name: "Central Colorado",
+      coverage: "Mesa Verde, Great Sand Dunes, Black Canyon",
+      bounds: {
+        northeast: { latitude: 38.5, longitude: -105.0 },
+        southwest: { latitude: 37.0, longitude: -109.0 },
+      },
+      baseSize: 110,
+    },
+  ];
+
+  // Static data for demonstration - this would be replaced by API calls
+  private static getStaticData(): AllDataStructure[] {
     return [
       {
         id: "item-1",
@@ -323,12 +400,355 @@ export class MockDataService {
     ];
   }
 
-  // Get explore data
-  static getExploreData(): {
+  // API Methods - These would connect to your backend
+  static async fetchAllLocations(): Promise<AllDataStructure[]> {
+    try {
+      // In real app, this would be an actual API call
+      // const response = await fetch(`${this.apiEndpoint}/locations`);
+      // const data = await response.json();
+      // return data;
+
+      // For now, return static data
+      return this.getStaticData();
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+      // Return cached data or static data as fallback
+      return this.getStaticData();
+    }
+  }
+
+  static async fetchLocationsByRegion(
+    regionId: string
+  ): Promise<AllDataStructure[]> {
+    try {
+      // In real app:
+      // const response = await fetch(`${this.apiEndpoint}/locations/region/${regionId}`);
+      // const data = await response.json();
+      // return data;
+
+      // For now, filter static data by region
+      const allLocations = await this.fetchAllLocations();
+      return this.categorizeLocationsByRegion(allLocations, regionId);
+    } catch (error) {
+      console.error(`Error fetching locations for region ${regionId}:`, error);
+      return [];
+    }
+  }
+
+  static async fetchOfflineMapData(regionId: string): Promise<{
+    locations: AllDataStructure[];
+    mapTiles: string[];
+    metadata: any;
+  }> {
+    try {
+      // In real app:
+      // const response = await fetch(`${this.apiEndpoint}/offline/region/${regionId}`);
+      // const data = await response.json();
+      // return data;
+
+      const locations = await this.fetchLocationsByRegion(regionId);
+      return {
+        locations,
+        mapTiles: this.generateMockMapTiles(regionId),
+        metadata: {
+          lastUpdated: Date.now(),
+          version: "1.0.0",
+          regionId,
+        },
+      };
+    } catch (error) {
+      console.error(
+        `Error fetching offline data for region ${regionId}:`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  // Dynamic region categorization
+  private static categorizeLocationsByRegion(
+    locations: AllDataStructure[],
+    regionId: string
+  ): AllDataStructure[] {
+    const regionConfig = this.regionConfigs.find((r) => r.id === regionId);
+    if (!regionConfig) return [];
+
+    return locations.filter((location) => {
+      // Check if location has coordinates
+      if (!location.latitude || !location.longitude) return false;
+
+      // Check if location is within region bounds
+      const withinBounds = this.isLocationWithinBounds(
+        location,
+        regionConfig.bounds
+      );
+
+      // Also check location name/address for keywords
+      const matchesKeywords = this.locationMatchesRegionKeywords(
+        location,
+        regionId
+      );
+
+      return withinBounds || matchesKeywords;
+    });
+  }
+
+  private static isLocationWithinBounds(
+    location: AllDataStructure,
+    bounds: OfflineRegionConfig["bounds"]
+  ): boolean {
+    if (!location.latitude || !location.longitude) return false;
+
+    return (
+      location.latitude >= bounds.southwest.latitude &&
+      location.latitude <= bounds.northeast.latitude &&
+      location.longitude >= bounds.southwest.longitude &&
+      location.longitude <= bounds.northeast.longitude
+    );
+  }
+
+  private static locationMatchesRegionKeywords(
+    location: AllDataStructure,
+    regionId: string
+  ): boolean {
+    const locationText = [
+      location.name,
+      location.location,
+      location.address,
+      location.title,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const regionKeywords: { [key: string]: string[] } = {
+      denver: [
+        "denver",
+        "boulder",
+        "aurora",
+        "lakewood",
+        "thornton",
+        "westminster",
+      ],
+      "colorado-springs": [
+        "colorado springs",
+        "manitou springs",
+        "fountain",
+        "security",
+      ],
+      "rocky-mountains": [
+        "estes park",
+        "rocky mountain",
+        "grand lake",
+        "trail ridge",
+      ],
+      "western-colorado": [
+        "aspen",
+        "vail",
+        "durango",
+        "grand junction",
+        "montrose",
+        "gunnison",
+        "steamboat",
+      ],
+      "central-colorado": [
+        "mesa verde",
+        "mosca",
+        "great sand dunes",
+        "alamosa",
+        "pueblo",
+      ],
+    };
+
+    const keywords = regionKeywords[regionId] || [];
+    return keywords.some((keyword) => locationText.includes(keyword));
+  }
+
+  // Generate mock map tiles URLs - in real app, these would be actual tile URLs
+  private static generateMockMapTiles(regionId: string): string[] {
+    const baseUrl =
+      "https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles";
+    const tiles: string[] = [];
+
+    // Generate tile URLs for different zoom levels
+    for (let z = 8; z <= 16; z++) {
+      tiles.push(`${baseUrl}/${z}/{x}/{y}?access_token=YOUR_MAPBOX_TOKEN`);
+    }
+
+    return tiles;
+  }
+
+  // Offline Data Management
+  static async downloadOfflineRegion(
+    regionId: string,
+    onProgress?: (progress: number) => void
+  ): Promise<boolean> {
+    try {
+      onProgress?.(0);
+
+      // Fetch offline data
+      const offlineData = await this.fetchOfflineMapData(regionId);
+      onProgress?.(30);
+
+      // Simulate downloading map tiles
+      await this.simulateMapTileDownload(regionId, onProgress);
+      onProgress?.(80);
+
+      // Cache the data
+      this.offlineCache[regionId] = {
+        locations: offlineData.locations,
+        mapTiles: true,
+        lastUpdated: Date.now(),
+        size: this.calculateRegionSize(offlineData.locations.length),
+      };
+
+      // Store in device storage (AsyncStorage in real app)
+      await this.storeOfflineData(regionId, offlineData);
+      onProgress?.(100);
+
+      return true;
+    } catch (error) {
+      console.error(`Error downloading offline region ${regionId}:`, error);
+      return false;
+    }
+  }
+
+  private static async simulateMapTileDownload(
+    regionId: string,
+    onProgress?: (progress: number) => void
+  ): Promise<void> {
+    // Simulate downloading process
+    const totalSteps = 10;
+    for (let i = 0; i < totalSteps; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      const progress = 30 + (50 * (i + 1)) / totalSteps;
+      onProgress?.(progress);
+    }
+  }
+
+  private static async storeOfflineData(
+    regionId: string,
+    data: any
+  ): Promise<void> {
+    try {
+      // In real app, use AsyncStorage:
+      // await AsyncStorage.setItem(`offline_region_${regionId}`, JSON.stringify(data));
+
+      // For now, just log
+      console.log(`Stored offline data for region ${regionId}`);
+    } catch (error) {
+      console.error(
+        `Error storing offline data for region ${regionId}:`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  static async loadOfflineData(regionId: string): Promise<AllDataStructure[]> {
+    try {
+      // In real app:
+      // const data = await AsyncStorage.getItem(`offline_region_${regionId}`);
+      // if (data) {
+      //   const parsedData = JSON.parse(data);
+      //   return parsedData.locations;
+      // }
+
+      // For now, return cached data
+      return this.offlineCache[regionId]?.locations || [];
+    } catch (error) {
+      console.error(
+        `Error loading offline data for region ${regionId}:`,
+        error
+      );
+      return [];
+    }
+  }
+
+  static async deleteOfflineRegion(regionId: string): Promise<boolean> {
+    try {
+      // Remove from cache
+      delete this.offlineCache[regionId];
+
+      // Remove from device storage
+      // await AsyncStorage.removeItem(`offline_region_${regionId}`);
+
+      return true;
+    } catch (error) {
+      console.error(`Error deleting offline region ${regionId}:`, error);
+      return false;
+    }
+  }
+
+  static isRegionDownloaded(regionId: string): boolean {
+    return !!this.offlineCache[regionId];
+  }
+
+  static getOfflineRegionSize(regionId: string): number {
+    return this.offlineCache[regionId]?.size || 0;
+  }
+
+  private static calculateRegionSize(locationCount: number): number {
+    // Calculate size based on number of locations and base region size
+    const baseSize = 50; // MB
+    const sizePerLocation = 2; // MB per location
+    return baseSize + locationCount * sizePerLocation;
+  }
+
+  // Generate dynamic offline regions from any data source
+  static async generateOfflineRegions(customData?: AllDataStructure[]): Promise<
+    {
+      id: string;
+      name: string;
+      size: string;
+      sizeInMB: number;
+      downloaded: boolean;
+      downloading: boolean;
+      coverage: string;
+      locations: AllDataStructure[];
+      bounds: OfflineRegionConfig["bounds"];
+    }[]
+  > {
+    try {
+      const allLocations = customData || (await this.fetchAllLocations());
+
+      return this.regionConfigs
+        .map((config) => {
+          const regionLocations = this.categorizeLocationsByRegion(
+            allLocations,
+            config.id
+          );
+          const sizeInMB = config.baseSize + regionLocations.length * 2;
+
+          return {
+            id: config.id,
+            name: config.name,
+            size: `${sizeInMB} MB`,
+            sizeInMB,
+            downloaded: this.isRegionDownloaded(config.id),
+            downloading: false,
+            coverage: config.coverage,
+            locations: regionLocations,
+            bounds: config.bounds,
+          };
+        })
+        .filter((region) => region.locations.length > 0);
+    } catch (error) {
+      console.error("Error generating offline regions:", error);
+      return [];
+    }
+  }
+
+  // Existing methods (corrected and enhanced)
+  static async getUnifiedData(): Promise<AllDataStructure[]> {
+    return await this.fetchAllLocations();
+  }
+
+  static async getExploreData(): Promise<{
     hiking: AllDataStructure[];
     travels: AllDataStructure[];
-  } {
-    const data = this.getUnifiedData();
+  }> {
+    const data = await this.fetchAllLocations();
     return {
       hiking: data.filter(
         (item) =>
@@ -345,124 +765,46 @@ export class MockDataService {
     };
   }
 
-  // Get enhanced recommendations
-  static getEnhancedRecommendations(): AllDataStructure[] {
-    return this.getUnifiedData().filter((item) => item.isFeatured);
+  static async getEnhancedRecommendations(): Promise<AllDataStructure[]> {
+    const data = await this.fetchAllLocations();
+    return data.filter((item) => item.isFeatured);
   }
 
-  // Get map locations with offline support
-  static getMapLocations(): AllDataStructure[] {
-    return this.getUnifiedData();
+  static async getMapLocations(): Promise<AllDataStructure[]> {
+    return await this.fetchAllLocations();
   }
 
-  // Get offline-supported locations only
-  static getOfflineSupportedLocations(): AllDataStructure[] {
-    return this.getUnifiedData().filter((item) => item.offlineSupported);
+  static async getOfflineSupportedLocations(): Promise<AllDataStructure[]> {
+    const data = await this.fetchAllLocations();
+    return data.filter((item) => item.offlineSupported);
   }
 
-  // Get locations by offline region
-  static getLocationsByOfflineRegion(regionId: string): AllDataStructure[] {
-    const allLocations = this.getUnifiedData();
+  static async getLocationsByOfflineRegion(
+    regionId: string
+  ): Promise<AllDataStructure[]> {
+    // First try to get from offline cache
+    const offlineData = await this.loadOfflineData(regionId);
+    if (offlineData.length > 0) {
+      return offlineData;
+    }
 
-    // Define region boundaries and categorize locations
-    const regionBoundaries: {
-      [key: string]: (location: AllDataStructure) => boolean;
-    } = {
-      denver: (loc) => {
-        const name = (loc.location || loc.name || "").toLowerCase();
-        const address = (loc.address || "").toLowerCase();
-        return (
-          name.includes("denver") ||
-          address.includes("denver") ||
-          name.includes("boulder") ||
-          name.includes("aurora") ||
-          name.includes("lakewood") ||
-          name.includes("morrison")
-        );
-      },
-      "colorado-springs": (loc) => {
-        const name = (loc.location || loc.name || "").toLowerCase();
-        const address = (loc.address || "").toLowerCase();
-        return (
-          name.includes("colorado springs") ||
-          address.includes("colorado springs") ||
-          name.includes("manitou") ||
-          name.includes("fountain") ||
-          (loc.latitude &&
-            loc.latitude >= 38.7 &&
-            loc.latitude <= 39.0 &&
-            loc.longitude &&
-            loc.longitude >= -105.2 &&
-            loc.longitude <= -104.6)
-        );
-      },
-      "rocky-mountains": (loc) => {
-        const name = (loc.location || loc.name || "").toLowerCase();
-        const address = (loc.address || "").toLowerCase();
-        return (
-          name.includes("estes") ||
-          name.includes("rocky mountain") ||
-          name.includes("grand lake") ||
-          address.includes("rocky mountain") ||
-          (loc.latitude &&
-            loc.latitude >= 40.1 &&
-            loc.latitude <= 40.6 &&
-            loc.longitude &&
-            loc.longitude >= -106.0 &&
-            loc.longitude <= -105.4)
-        );
-      },
-      "western-colorado": (loc) => {
-        const name = (loc.location || loc.name || "").toLowerCase();
-        return (
-          name.includes("aspen") ||
-          name.includes("vail") ||
-          name.includes("durango") ||
-          name.includes("grand junction") ||
-          name.includes("montrose") ||
-          name.includes("gunnison") ||
-          (loc.latitude &&
-            loc.longitude &&
-            loc.latitude >= 37.0 &&
-            loc.latitude <= 40.8 &&
-            loc.longitude >= -109.0 &&
-            loc.longitude <= -106.0)
-        );
-      },
-      "central-colorado": (loc) => {
-        const name = (loc.location || loc.name || "").toLowerCase();
-        return (
-          name.includes("mesa verde") ||
-          name.includes("mosca") ||
-          name.includes("great sand dunes") ||
-          (loc.latitude &&
-            loc.longitude &&
-            loc.latitude >= 37.0 &&
-            loc.latitude <= 38.5 &&
-            loc.longitude >= -109.0 &&
-            loc.longitude <= -105.0)
-        );
-      },
-    };
-
-    const filterFunction = regionBoundaries[regionId];
-    if (!filterFunction) return [];
-
-    return allLocations.filter(filterFunction);
+    // Otherwise fetch from API
+    return await this.fetchLocationsByRegion(regionId);
   }
 
-  // Get category-specific explore items
-  static getCategoryExploreItems(categoryId: string): AllDataStructure[] {
-    return this.getUnifiedData().filter((item) =>
+  static async getCategoryExploreItems(
+    categoryId: string
+  ): Promise<AllDataStructure[]> {
+    const data = await this.fetchAllLocations();
+    return data.filter((item) =>
       item.categories?.some((cat) =>
         cat.toLowerCase().includes(categoryId.toLowerCase())
       )
     );
   }
 
-  // Search functionality with location support
-  static searchContent(query: string) {
-    const data = this.getUnifiedData();
+  static async searchContent(query: string) {
+    const data = await this.fetchAllLocations();
     const lowercaseQuery = query.toLowerCase();
 
     return {
@@ -500,13 +842,12 @@ export class MockDataService {
     };
   }
 
-  // Get nearby locations based on coordinates
-  static getNearbyLocations(
+  static async getNearbyLocations(
     latitude: number,
     longitude: number,
     radiusKm: number = 50
-  ): AllDataStructure[] {
-    const locations = this.getMapLocations();
+  ): Promise<AllDataStructure[]> {
+    const locations = await this.getMapLocations();
 
     return locations
       .filter((location) => {
@@ -536,7 +877,6 @@ export class MockDataService {
       });
   }
 
-  // Calculate distance between two coordinates using Haversine formula
   static calculateDistance(
     lat1: number,
     lon1: number,
@@ -556,40 +896,46 @@ export class MockDataService {
     return R * c;
   }
 
-  // Get location by ID
-  static getLocationById(id: string): AllDataStructure | undefined {
-    return this.getMapLocations().find((location) => location.id === id);
+  static async getLocationById(
+    id: string
+  ): Promise<AllDataStructure | undefined> {
+    const locations = await this.getMapLocations();
+    return locations.find((location) => location.id === id);
   }
 
-  // Get random featured locations
-  static getFeaturedLocations(count: number = 3): AllDataStructure[] {
-    const locations = this.getMapLocations().filter((item) => item.isFeatured);
-    const shuffled = locations.sort(() => 0.5 - Math.random());
+  static async getFeaturedLocations(
+    count: number = 3
+  ): Promise<AllDataStructure[]> {
+    const locations = await this.getMapLocations();
+    const featured = locations.filter((item) => item.isFeatured);
+    const shuffled = featured.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   }
 
-  // Get locations by type
-  static getLocationsByType(type: string): AllDataStructure[] {
-    return this.getMapLocations().filter(
+  static async getLocationsByType(type: string): Promise<AllDataStructure[]> {
+    const locations = await this.getMapLocations();
+    return locations.filter(
       (location) => location.type?.toLowerCase() === type.toLowerCase()
     );
   }
 
-  // Get locations by category
-  static getLocationsByCategory(category: string): AllDataStructure[] {
-    return this.getMapLocations().filter((location) =>
+  static async getLocationsByCategory(
+    category: string
+  ): Promise<AllDataStructure[]> {
+    const locations = await this.getMapLocations();
+    return locations.filter((location) =>
       location.categories?.some((cat) =>
         cat.toLowerCase().includes(category.toLowerCase())
       )
     );
   }
 
-  // Get locations by rating range
-  static getLocationsByRating(
+  static async getLocationsByRating(
     minRating: number,
     maxRating: number = 5
-  ): AllDataStructure[] {
-    return this.getMapLocations().filter(
+  ): Promise<AllDataStructure[]> {
+    const locations = await this.getMapLocations();
+    return locations.filter(
       (location) =>
         location.rating &&
         location.rating >= minRating &&
@@ -597,33 +943,34 @@ export class MockDataService {
     );
   }
 
-  // Get locations by price level
-  static getLocationsByPriceLevel(priceLevel: number): AllDataStructure[] {
-    return this.getMapLocations().filter(
-      (location) => location.priceLevel === priceLevel
-    );
+  static async getLocationsByPriceLevel(
+    priceLevel: number
+  ): Promise<AllDataStructure[]> {
+    const locations = await this.getMapLocations();
+    return locations.filter((location) => location.priceLevel === priceLevel);
   }
 
-  // Get explore items by category
-  static getExploreItemsByCategory(category: string): AllDataStructure[] {
-    return this.getUnifiedData().filter((item) =>
+  static async getExploreItemsByCategory(
+    category: string
+  ): Promise<AllDataStructure[]> {
+    const data = await this.fetchAllLocations();
+    return data.filter((item) =>
       item.categories?.some((cat) =>
         cat.toLowerCase().includes(category.toLowerCase())
       )
     );
   }
 
-  // Get featured recommendations
-  static getFeaturedRecommendations(): AllDataStructure[] {
-    return this.getEnhancedRecommendations();
+  static async getFeaturedRecommendations(): Promise<AllDataStructure[]> {
+    return await this.getEnhancedRecommendations();
   }
 
-  // Get recommendations by price range
-  static getRecommendationsByPriceRange(
+  static async getRecommendationsByPriceRange(
     minPrice: number,
     maxPrice: number
-  ): AllDataStructure[] {
-    return this.getEnhancedRecommendations().filter(
+  ): Promise<AllDataStructure[]> {
+    const recommendations = await this.getEnhancedRecommendations();
+    return recommendations.filter(
       (item) =>
         item.priceLevel !== undefined &&
         item.priceLevel >= minPrice &&
@@ -631,9 +978,8 @@ export class MockDataService {
     );
   }
 
-  // Get all unique categories from locations
-  static getAllLocationCategories(): string[] {
-    const locations = this.getMapLocations();
+  static async getAllLocationCategories(): Promise<string[]> {
+    const locations = await this.getMapLocations();
     const categories = new Set<string>();
 
     locations.forEach((location) => {
@@ -643,9 +989,8 @@ export class MockDataService {
     return Array.from(categories).sort();
   }
 
-  // Get all unique types from locations
-  static getAllLocationTypes(): string[] {
-    const locations = this.getMapLocations();
+  static async getAllLocationTypes(): Promise<string[]> {
+    const locations = await this.getMapLocations();
     const types = new Set<string>();
 
     locations.forEach((location) => types.add(location.type || "Unknown"));
@@ -653,11 +998,11 @@ export class MockDataService {
     return Array.from(types).sort();
   }
 
-  // Get statistics about locations
-  static getLocationStatistics() {
-    const locations = this.getMapLocations();
-    const recommendations = this.getEnhancedRecommendations();
-    const exploreData = this.getExploreData();
+  static async getLocationStatistics() {
+    const locations = await this.getMapLocations();
+    const recommendations = await this.getEnhancedRecommendations();
+    const exploreData = await this.getExploreData();
+    const types = await this.getAllLocationTypes();
 
     return {
       totalLocations: locations.length,
@@ -667,33 +1012,37 @@ export class MockDataService {
       averageRating:
         locations.reduce((sum, loc) => sum + (loc.rating || 0), 0) /
         locations.length,
-      locationsByType: this.getAllLocationTypes().map((type) => ({
-        type,
-        count: this.getLocationsByType(type).length,
-      })),
-      locationsByPriceLevel: [1, 2, 3].map((level) => ({
-        level,
-        count: this.getLocationsByPriceLevel(level).length,
-      })),
+      locationsByType: await Promise.all(
+        types.map(async (type) => ({
+          type,
+          count: (await this.getLocationsByType(type)).length,
+        }))
+      ),
+      locationsByPriceLevel: await Promise.all(
+        [1, 2, 3].map(async (level) => ({
+          level,
+          count: (await this.getLocationsByPriceLevel(level)).length,
+        }))
+      ),
     };
   }
 
-  // Get random items for discovery
-  static getRandomDiscoveryItems(count: number = 5): AllDataStructure[] {
-    const allItems = this.getUnifiedData();
+  static async getRandomDiscoveryItems(
+    count: number = 5
+  ): Promise<AllDataStructure[]> {
+    const allItems = await this.fetchAllLocations();
     const shuffled = allItems.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   }
 
-  // Filter items by multiple criteria
-  static filterItems(criteria: {
+  static async filterItems(criteria: {
     category?: string;
     minRating?: number;
     maxPrice?: number;
     location?: string;
     type?: string;
   }) {
-    let filteredItems = this.getUnifiedData();
+    let filteredItems = await this.fetchAllLocations();
 
     // Apply filters
     if (criteria.category) {
@@ -743,5 +1092,102 @@ export class MockDataService {
       recommendations: filteredItems.filter((item) => item.isFeatured),
       locations: filteredItems,
     };
+  }
+
+  // Network status methods for offline functionality
+  static async syncOfflineData(): Promise<boolean> {
+    try {
+      // Check which regions are downloaded
+      const downloadedRegions = Object.keys(this.offlineCache);
+
+      for (const regionId of downloadedRegions) {
+        // Fetch latest data for each region
+        const latestData = await this.fetchLocationsByRegion(regionId);
+
+        // Update offline cache
+        this.offlineCache[regionId] = {
+          ...this.offlineCache[regionId],
+          locations: latestData,
+          lastUpdated: Date.now(),
+        };
+
+        // Update stored data
+        await this.storeOfflineData(regionId, {
+          locations: latestData,
+          mapTiles: this.generateMockMapTiles(regionId),
+          metadata: {
+            lastUpdated: Date.now(),
+            version: "1.0.0",
+            regionId,
+          },
+        });
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error syncing offline data:", error);
+      return false;
+    }
+  }
+
+  static getOfflineDataInfo(): {
+    totalRegions: number;
+    totalSize: number;
+    totalLocations: number;
+    lastSyncTime: number;
+    regions: {
+      id: string;
+      name: string;
+      size: number;
+      locationCount: number;
+    }[];
+  } {
+    const regions = Object.entries(this.offlineCache).map(([id, data]) => {
+      const config = this.regionConfigs.find((r) => r.id === id);
+      return {
+        id,
+        name: config?.name || id,
+        size: data.size,
+        locationCount: data.locations.length,
+      };
+    });
+
+    return {
+      totalRegions: regions.length,
+      totalSize: regions.reduce((sum, region) => sum + region.size, 0),
+      totalLocations: regions.reduce(
+        (sum, region) => sum + region.locationCount,
+        0
+      ),
+      lastSyncTime: Math.max(
+        ...Object.values(this.offlineCache).map((data) => data.lastUpdated),
+        0
+      ),
+      regions,
+    };
+  }
+
+  // Utility method to check if app is in offline mode
+  static isOfflineMode(): boolean {
+    // In real app, this would check network connectivity
+    // For now, assume online
+    return false;
+  }
+
+  // Method to get data with offline fallback
+  static async getDataWithOfflineFallback<T>(
+    onlineMethod: () => Promise<T>,
+    offlineMethod: () => Promise<T>
+  ): Promise<T> {
+    try {
+      if (this.isOfflineMode()) {
+        return await offlineMethod();
+      } else {
+        return await onlineMethod();
+      }
+    } catch (error) {
+      console.warn("Online method failed, falling back to offline:", error);
+      return await offlineMethod();
+    }
   }
 }
