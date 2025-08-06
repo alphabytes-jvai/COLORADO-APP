@@ -1,3 +1,4 @@
+// app\(screen)\offline-maps.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -559,7 +560,7 @@ export default function OfflineScreen() {
       <StatusBar backgroundColor="#4CAF50" />
 
       {/* Header */}
-      <View className="bg-green-500 -mt-16 pt-20 pb-6 px-4">
+      <View className="bg-green-500 -mt-16 pt-16 pb-5 px-5">
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity
             onPress={() => router.back()}

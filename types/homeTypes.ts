@@ -47,7 +47,7 @@ export interface AllDataStructure extends AddressLocation {
   description?: string;
   rating?: number;
   dateRange?: string;
-  images?: unknown[];
+  images?: (ImageSourcePropType | string)[];
   isFeatured?: boolean;
   phone?: string;
   socialLinks?: SocialMediaLinks;
