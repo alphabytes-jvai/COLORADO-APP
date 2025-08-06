@@ -266,7 +266,7 @@ export class CategoryService {
   static getRecommendedItems(): AllDataStructure[] {
     return [
       {
-        id: "rec-1",
+        id: "item-1",
         title: "Colorado Adventure Guide",
         name: "Statewide Exploration",
         address: "Various locations, CO",
@@ -294,7 +294,7 @@ export class CategoryService {
         categories: ["Adventure", "Tourism", "Outdoor"],
       },
       {
-        id: "rec-2",
+        id: "item-2",
         title: "Mountain Hiking",
         name: "Rocky Mountain Excursions",
         address: "1000 US Hwy 36, Estes Park, CO 80517",
@@ -321,7 +321,7 @@ export class CategoryService {
         categories: ["Hiking", "Nature", "Fitness"],
       },
       {
-        id: "rec-3",
+        id: "item-3",
         title: "Local Gems",
         name: "Hidden Spots",
         address: "Various locations, CO",
@@ -345,7 +345,7 @@ export class CategoryService {
         categories: ["Exploration", "Local", "Adventure"],
       },
       {
-        id: "rec-4",
+        id: "item-4",
         title: "Cultural Immersion",
         name: "Art & History Tour",
         address: "200 E Colfax Ave, Denver, CO 80203",

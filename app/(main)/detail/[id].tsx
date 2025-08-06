@@ -41,6 +41,7 @@ import {
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
+import { CategoryService } from "@/services/homeService";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -107,37 +108,71 @@ export default function DetailScreen() {
       setLoading(true);
       setError(null);
 
+      // First, try to get data from navigation params
+      if (params.itemData) {
+        try {
+          const parsedData = JSON.parse(params.itemData as string);
+          console.log(
+            "Using data from navigation params:",
+            parsedData.title || parsedData.name
+          );
+          setDetailData(parsedData);
+          return;
+        } catch (parseError) {
+          console.warn("Failed to parse itemData from params:", parseError);
+          // Continue to ID-based lookup
+        }
+      }
+
+      // Fallback: Search by ID in all available data sources
       const itemId = params.id as string;
+      console.log("Searching for item with ID:", itemId);
 
-      // First try to get the specific item by ID
-      let item = await MockDataService.getLocationById(itemId);
-
-      // If not found, try to get from all locations
-      if (!item) {
-        const allLocations = await MockDataService.fetchAllLocations();
-        item = allLocations.find((location) => location.id === itemId);
-      }
-
-      // If still not found, try to get from recommended items
-      if (!item) {
-        const recommendedItems =
-          await MockDataService.getEnhancedRecommendations();
-        item = recommendedItems.find((rec) => rec.id === itemId);
-      }
-
-      // If still not found, try from explore items
-      if (!item) {
-        const exploreData = await MockDataService.getExploreData();
-        item = [...exploreData.hiking, ...exploreData.travels].find(
-          (exp) => exp.id === itemId
-        );
-      }
+      // Try MockDataService first
+      const mockLocations = await MockDataService.fetchAllLocations();
+      let item = mockLocations.find((location) => location.id === itemId);
 
       if (item) {
+        console.log("Found item in MockDataService:", item.title || item.name);
         setDetailData(item);
-      } else {
-        setError("Item not found");
+        return;
       }
+
+      // Try CategoryService data
+      const exploreItems = CategoryService.getExploreItems();
+      item = exploreItems.find((location) => location.id === itemId);
+
+      if (item) {
+        console.log(
+          "Found item in CategoryService explore items:",
+          item.title || item.name
+        );
+        setDetailData(item);
+        return;
+      }
+
+      // Try recommended items
+      const recommendedItems = CategoryService.getRecommendedItems();
+      item = recommendedItems.find((location) => location.id === itemId);
+
+      if (item) {
+        console.log(
+          "Found item in CategoryService recommended items:",
+          item.title || item.name
+        );
+        setDetailData(item);
+        return;
+      }
+
+      // If still not found, log available IDs for debugging
+      const allAvailableIds = [
+        ...mockLocations.map((item) => item.id),
+        ...exploreItems.map((item) => item.id),
+        ...recommendedItems.map((item) => item.id),
+      ];
+      console.log("Available IDs:", allAvailableIds);
+      console.log("Item not found for ID:", itemId);
+      setError("Item not found");
     } catch (err) {
       console.error("Error loading detail data:", err);
       setError("Failed to load item details");
@@ -211,11 +246,11 @@ export default function DetailScreen() {
     const parts = text.split(/(\*\*.*?\*\*)/g);
 
     return (
-      <Text className="text-gray-700 text-base leading-6">
+      <Text className='text-gray-700 text-base leading-6'>
         {parts.map((part, index) => {
           if (part.startsWith("**") && part.endsWith("**")) {
             return (
-              <Text key={index} className="font-bold">
+              <Text key={index} className='font-bold'>
                 <TranslatedText>{part.slice(2, -2)}</TranslatedText>
               </Text>
             );
@@ -231,7 +266,7 @@ export default function DetailScreen() {
     const hasImages = images.length > 0;
 
     return (
-      <View className="relative" style={{ height: SCREEN_HEIGHT * 0.4 }}>
+      <View className='relative' style={{ height: SCREEN_HEIGHT * 0.4 }}>
         <ScrollView
           ref={scrollViewRef}
           horizontal
@@ -259,7 +294,7 @@ export default function DetailScreen() {
                   key={index}
                   source={imageSource}
                   style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.4 }}
-                  resizeMode="stretch"
+                  resizeMode='stretch'
                 />
               );
             })
@@ -267,7 +302,7 @@ export default function DetailScreen() {
             <Image
               source={require("@/assets/images/placeholder.png")}
               style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.4 }}
-              resizeMode="cover"
+              resizeMode='cover'
             />
           )}
         </ScrollView>
@@ -275,22 +310,22 @@ export default function DetailScreen() {
         {/* Gradient overlay at the bottom */}
         <LinearGradient
           colors={["transparent", "rgba(0,0,0,0.3)"]}
-          className="absolute bottom-0 left-0 right-0 h-20"
+          className='absolute bottom-0 left-0 right-0 h-20'
         />
 
         {/* Back button */}
         <TouchableOpacity
           onPress={() => router.back()}
-          className="absolute top-12 left-4 w-10 h-10 bg-white/90 rounded-full items-center justify-center border border-gray-200/50"
+          className='absolute top-3 left-4 w-10 h-10 bg-white/90 rounded-full items-center justify-center border border-gray-200/50'
           activeOpacity={0.8}
         >
-          <ChevronLeft size={22} color="#1F2937" />
+          <ChevronLeft size={22} color='#1F2937' />
         </TouchableOpacity>
 
         {/* Favorite button */}
         <TouchableOpacity
           onPress={() => setIsFavorite(!isFavorite)}
-          className="absolute top-12 right-4 w-10 h-10 bg-white/90 rounded-full items-center justify-center border border-gray-200/50"
+          className='absolute top-3 right-4 w-10 h-10 bg-white/90 rounded-full items-center justify-center border border-gray-200'
           activeOpacity={0.8}
         >
           <Heart
@@ -303,17 +338,17 @@ export default function DetailScreen() {
         {/* Share button */}
         <TouchableOpacity
           onPress={handleShare}
-          className="absolute top-12 right-16 w-10 h-10 bg-white/90 rounded-full items-center justify-center border border-gray-200/50"
+          className='absolute top-3 right-16 w-10 h-10 bg-white/90 rounded-full items-center justify-center border border-gray-200/50'
           activeOpacity={0.8}
         >
-          <Share2 size={18} color="#6B7280" />
+          <Share2 size={18} color='#6B7280' />
         </TouchableOpacity>
 
         {/* Rating badge */}
         {detailData?.rating && (
-          <View className="absolute bottom-6 left-4 bg-black/80 px-3 py-1 rounded-full flex-row items-center">
-            <Star size={12} color="#FCD34D" fill="#FCD34D" />
-            <Text className="text-white text-sm font-semibold ml-1">
+          <View className='absolute bottom-6 left-4 bg-black/80 px-3 py-1 rounded-full flex-row items-center'>
+            <Star size={12} color='#FCD34D' fill='#FCD34D' />
+            <Text className='text-white text-sm font-semibold ml-1'>
               {detailData.rating.toFixed(1)}
             </Text>
           </View>
@@ -321,8 +356,8 @@ export default function DetailScreen() {
 
         {/* Featured badge */}
         {detailData?.isFeatured && (
-          <View className="absolute bottom-6 right-4 bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1 rounded-full">
-            <Text className="text-white text-xs font-bold">
+          <View className='absolute bottom-6 right-4 bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1 rounded-full'>
+            <Text className='text-white text-xs font-bold'>
               <TranslatedText>Featured</TranslatedText>
             </Text>
           </View>
@@ -372,22 +407,22 @@ export default function DetailScreen() {
     if (availableSocials.length === 0) return null;
 
     return (
-      <View className="mb-6">
-        <Text className="text-lg font-semibold text-gray-900 mb-3">
+      <View className='mb-6'>
+        <Text className='text-lg font-semibold text-gray-900 mb-3'>
           <TranslatedText>Socials</TranslatedText>
         </Text>
-        <View className="flex-row justify-start flex-wrap">
+        <View className='flex-row justify-start flex-wrap'>
           {availableSocials.map((platform, index) => {
             const IconComponent = platform.icon;
             return (
               <TouchableOpacity
                 key={platform.key}
                 onPress={() => handleSocialPress(platform.url!)}
-                className="w-10 h-10 rounded-full items-center justify-center mr-3 mb-2"
+                className='w-10 h-10 rounded-full items-center justify-center mr-3 mb-2'
                 style={{ backgroundColor: platform.color }}
                 activeOpacity={0.8}
               >
-                <IconComponent size={20} color="white" />
+                <IconComponent size={20} color='white' />
               </TouchableOpacity>
             );
           })}
@@ -397,18 +432,18 @@ export default function DetailScreen() {
   };
 
   const renderInfoSection = () => (
-    <View className="mb-6">
-      <Text className="text-lg font-semibold text-gray-900 mb-4">
+    <View className='mb-6'>
+      <Text className='text-lg font-semibold text-gray-900 mb-4'>
         <TranslatedText>Information</TranslatedText>
       </Text>
 
-      <View className="space-y-4">
+      <View className='space-y-4'>
         {/* Location */}
         {(detailData?.location || detailData?.address) && (
-          <View className="flex-row items-start">
-            <MapPin size={18} color="#6B7280" className="mt-1" />
-            <View className="flex-1 ml-3">
-              <Text className="text-gray-700 text-base leading-6">
+          <View className='flex-row items-start'>
+            <MapPin size={18} color='#6B7280' className='mt-1' />
+            <View className='flex-1 ml-3'>
+              <Text className='text-gray-700 text-base leading-6'>
                 <TranslatedText>
                   {(detailData.address || detailData.location) ?? ""}
                 </TranslatedText>
@@ -421,11 +456,11 @@ export default function DetailScreen() {
         {detailData?.phone && (
           <TouchableOpacity
             onPress={handlePhonePress}
-            className="flex-row items-center"
+            className='flex-row items-center'
             activeOpacity={0.7}
           >
-            <Phone size={18} color="#6B7280" />
-            <Text className="text-blue-600 text-base ml-3 underline">
+            <Phone size={18} color='#6B7280' />
+            <Text className='text-blue-600 text-base ml-3 underline'>
               {detailData.phone}
             </Text>
           </TouchableOpacity>
@@ -433,9 +468,9 @@ export default function DetailScreen() {
 
         {/* Opening Hours */}
         {detailData?.openingHours && (
-          <View className="flex-row items-center">
-            <Clock size={18} color="#6B7280" />
-            <Text className="text-gray-700 text-base ml-3">
+          <View className='flex-row items-center'>
+            <Clock size={18} color='#6B7280' />
+            <Text className='text-gray-700 text-base ml-3'>
               <TranslatedText>{detailData.openingHours}</TranslatedText>
             </Text>
           </View>
@@ -443,9 +478,9 @@ export default function DetailScreen() {
 
         {/* Date Range */}
         {detailData?.dateRange && (
-          <View className="flex-row items-center">
-            <Calendar size={18} color="#6B7280" />
-            <Text className="text-gray-700 text-base ml-3">
+          <View className='flex-row items-center'>
+            <Calendar size={18} color='#6B7280' />
+            <Text className='text-gray-700 text-base ml-3'>
               <TranslatedText>{detailData.dateRange}</TranslatedText>
             </Text>
           </View>
@@ -453,9 +488,9 @@ export default function DetailScreen() {
 
         {/* Price Level */}
         {detailData?.priceLevel && (
-          <View className="flex-row items-center">
-            <DollarSign size={18} color="#059669" />
-            <Text className="text-emerald-600 text-base font-semibold ml-3">
+          <View className='flex-row items-center'>
+            <DollarSign size={18} color='#059669' />
+            <Text className='text-emerald-600 text-base font-semibold ml-3'>
               {getPriceLevelText(detailData.priceLevel)}
             </Text>
           </View>
@@ -463,9 +498,9 @@ export default function DetailScreen() {
 
         {/* Type */}
         {detailData?.type && (
-          <View className="flex-row items-center">
-            <Tag size={18} color="#8B5CF6" />
-            <Text className="text-purple-600 text-base ml-3">
+          <View className='flex-row items-center'>
+            <Tag size={18} color='#8B5CF6' />
+            <Text className='text-purple-600 text-base ml-3'>
               <TranslatedText>{detailData.type}</TranslatedText>
             </Text>
           </View>
@@ -479,17 +514,17 @@ export default function DetailScreen() {
       return null;
 
     return (
-      <View className="mb-6">
-        <Text className="text-lg font-semibold text-gray-900 mb-3">
+      <View className='mb-6'>
+        <Text className='text-lg font-semibold text-gray-900 mb-3'>
           <TranslatedText>Categories</TranslatedText>
         </Text>
-        <View className="flex-row flex-wrap">
+        <View className='flex-row flex-wrap'>
           {detailData.categories.map((category, index) => (
             <View
               key={index}
-              className="bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-full mr-2 mb-2"
+              className='bg-indigo-50 border border-indigo-200 px-3 py-2 rounded-full mr-2 mb-2'
             >
-              <Text className="text-indigo-600 text-sm font-medium">
+              <Text className='text-indigo-600 text-sm font-medium'>
                 <TranslatedText>{category}</TranslatedText>
               </Text>
             </View>
@@ -502,38 +537,38 @@ export default function DetailScreen() {
   // Loading State
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-surface">
-        <StatusBar style="dark" />
+      <SafeAreaView className='flex-1 bg-surface'>
+        <StatusBar style='dark' />
 
         {/* Header Background */}
-        <View className="absolute -top-16 left-0 right-0">
+        <View className='absolute -top-16 left-0 right-0'>
           <ImageBackground
             source={require("@/assets/images/top-cloud.png")}
             style={{
               width: SCREEN_WIDTH,
               height: SCREEN_HEIGHT * 0.4,
             }}
-            resizeMode="cover"
+            resizeMode='cover'
           />
         </View>
 
         {/* Header */}
-        <View className="flex-row items-center px-5 py-2 z-10">
+        <View className='flex-row items-center px-5 py-2 z-10'>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="w-10 h-10 bg-white/95 rounded-xl items-center justify-center shadow-sm border border-gray-100"
+            className='w-10 h-10 bg-white/95 rounded-xl items-center justify-center shadow-sm border border-gray-100'
             activeOpacity={0.8}
           >
-            <ChevronLeft size={22} color="#1F2937" />
+            <ChevronLeft size={22} color='#1F2937' />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900 ml-3">
+          <Text className='text-xl font-bold text-gray-900 ml-3'>
             <TranslatedText>Loading...</TranslatedText>
           </Text>
         </View>
 
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#6366F1" />
-          <Text className="text-gray-500 mt-4">
+        <View className='flex-1 items-center justify-center'>
+          <ActivityIndicator size='large' color='#6366F1' />
+          <Text className='text-gray-500 mt-4'>
             <TranslatedText>Loading details...</TranslatedText>
           </Text>
         </View>
@@ -544,53 +579,53 @@ export default function DetailScreen() {
   // Error State
   if (error || !detailData) {
     return (
-      <SafeAreaView className="flex-1 bg-surface">
-        <StatusBar style="dark" />
+      <SafeAreaView className='flex-1 bg-surface'>
+        <StatusBar style='dark' />
 
         {/* Header Background */}
-        <View className="absolute -top-16 left-0 right-0">
+        <View className='absolute -top-16 left-0 right-0'>
           <ImageBackground
             source={require("@/assets/images/top-cloud.png")}
             style={{
               width: SCREEN_WIDTH,
               height: SCREEN_HEIGHT * 0.4,
             }}
-            resizeMode="cover"
+            resizeMode='cover'
           />
         </View>
 
         {/* Header */}
-        <View className="flex-row items-center px-5 py-2 z-10">
+        <View className='flex-row items-center px-5 py-2 z-10'>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="w-10 h-10 bg-white/95 rounded-xl items-center justify-center shadow-sm border border-gray-100"
+            className='w-10 h-10 bg-white/95 rounded-xl items-center justify-center shadow-sm border border-gray-100'
             activeOpacity={0.8}
           >
-            <ChevronLeft size={22} color="#1F2937" />
+            <ChevronLeft size={22} color='#1F2937' />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900 ml-3">
+          <Text className='text-xl font-bold text-gray-900 ml-3'>
             <TranslatedText>Error</TranslatedText>
           </Text>
         </View>
 
-        <View className="flex-1 items-center justify-center px-5">
-          <View className="w-24 h-24 bg-red-100 rounded-full items-center justify-center mb-6">
-            <ExternalLink size={32} color="#DC2626" />
+        <View className='flex-1 items-center justify-center px-5'>
+          <View className='w-24 h-24 bg-red-100 rounded-full items-center justify-center mb-6'>
+            <ExternalLink size={32} color='#DC2626' />
           </View>
-          <Text className="text-xl font-semibold text-gray-700 mb-2 text-center">
+          <Text className='text-xl font-semibold text-gray-700 mb-2 text-center'>
             <TranslatedText>Item Not Found</TranslatedText>
           </Text>
-          <Text className="text-gray-500 text-center max-w-sm leading-6 mb-6">
+          <Text className='text-gray-500 text-center max-w-sm leading-6 mb-6'>
             <TranslatedText>
               {error || "The item you're looking for could not be found."}
             </TranslatedText>
           </Text>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="bg-indigo-600 px-6 py-3 rounded-xl"
+            className='bg-indigo-600 px-6 py-3 rounded-xl'
             activeOpacity={0.8}
           >
-            <Text className="text-white font-semibold">
+            <Text className='text-white font-semibold'>
               <TranslatedText>Go Back</TranslatedText>
             </Text>
           </TouchableOpacity>
@@ -604,25 +639,25 @@ export default function DetailScreen() {
 
   // Main Content
   return (
-    <SafeAreaView className="flex-1 bg-surface" edges={["top"]}>
+    <SafeAreaView className='flex-1 bg-surface' edges={["top"]}>
       {/* <StatusBar style="auto" /> */}
-      <View className="absolute -top-16 left-0 right-0">
+      <View className='absolute -top-16 left-0 right-0'>
         <ImageBackground
           source={require("@/assets/images/top-cloud.png")}
           style={{
             width: SCREEN_WIDTH,
             height: SCREEN_HEIGHT * 0.4,
           }}
-          resizeMode="cover"
+          resizeMode='cover'
         />
       </View>
-      <View className="flex-1">
+      <View className='flex-1'>
         {/* Image Background with auto-changing slider */}
         {renderImageSlider()}
 
         {/* Content Section - Overlaying with rounded top */}
         <View
-          className="flex-1 bg-white rounded-t-3xl"
+          className='flex-1 bg-white rounded-t-3xl'
           style={{
             marginTop: -25, // Overlap the image
             minHeight: SCREEN_HEIGHT * 0.4,
@@ -630,13 +665,13 @@ export default function DetailScreen() {
         >
           {/* Image indicators in the top white space center */}
           {hasImages && images.length > 1 && (
-            <View className="flex-row justify-center pt-4 pb-2">
+            <View className='flex-row justify-center pt-4 pb-2'>
               {images.map((_, index) => (
                 <View
                   key={index}
                   className={`w-2 h-2 rounded-full mx-1 ${
                     index === currentImageIndex
-                      ? "bg-indigo-600"
+                      ? "bg-primary w-4"
                       : "bg-gray-300"
                   }`}
                 />
@@ -645,24 +680,24 @@ export default function DetailScreen() {
           )}
 
           <ScrollView
-            className="flex-1"
+            className='flex-1'
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 80 }}
           >
             {/* Content */}
-            <View className="px-5 pt-4">
+            <View className='px-5 pt-4'>
               {/* Title and Subtitle */}
-              <View className="mb-6">
-                <Text className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+              <View className='mb-6'>
+                <Text className='text-2xl font-bold text-gray-900 mb-2 leading-tight'>
                   <TranslatedText>
                     {detailData.title || detailData.name || "Untitled"}
                   </TranslatedText>
                 </Text>
 
                 {detailData.location && (
-                  <View className="flex-row items-center mb-2">
-                    <MapPin size={16} color="#6B7280" />
-                    <Text className="text-gray-600 text-base ml-1">
+                  <View className='flex-row items-center mb-2'>
+                    <MapPin size={16} color='#6B7280' />
+                    <Text className='text-gray-600 text-base ml-1'>
                       <TranslatedText>{detailData.location}</TranslatedText>
                     </Text>
                   </View>
@@ -670,7 +705,7 @@ export default function DetailScreen() {
 
                 {/* Event Count */}
                 {detailData.eventCount && (
-                  <Text className="text-indigo-600 text-sm font-medium">
+                  <Text className='text-indigo-600 text-sm font-medium'>
                     <TranslatedText>
                       {`${detailData.eventCount} events available`}
                     </TranslatedText>
@@ -683,8 +718,8 @@ export default function DetailScreen() {
 
               {/* Description */}
               {detailData.description && (
-                <View className="mb-5">
-                  <Text className="text-lg font-semibold text-gray-900 mb-3">
+                <View className='mb-5'>
+                  <Text className='text-lg font-semibold text-gray-900 mb-3'>
                     <TranslatedText>Description</TranslatedText>
                   </Text>
                   {renderMarkdownText(detailData.description)}
@@ -699,11 +734,11 @@ export default function DetailScreen() {
 
               {/* Offline Support Info */}
               {detailData.offlineSupported && (
-                <View className="mb-8 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <Text className="text-green-800 font-semibold mb-1">
+                <View className='mb-8 p-4 bg-green-50 rounded-xl border border-green-200'>
+                  <Text className='text-green-800 font-semibold mb-1'>
                     <TranslatedText>Offline Support Available</TranslatedText>
                   </Text>
-                  <Text className="text-green-700 text-sm">
+                  <Text className='text-green-700 text-sm'>
                     <TranslatedText>
                       This location supports offline access including maps and
                       navigation.
@@ -717,18 +752,18 @@ export default function DetailScreen() {
 
         {/* Bottom Action Button - Fixed at bottom */}
         <View
-          className="absolute bottom-0 left-0 right-0 px-5 py-2 bg-white border-t border-gray-100"
+          className='absolute bottom-0 left-0 right-0 px-5 py-2 bg-white border-t border-gray-100'
           style={{ paddingBottom: Platform.OS === "ios" ? 34 : 20 }}
         >
           <Button
             onPress={handleGetDirections}
-            className="w-full bg-primary"
-            size="lg"
-            textClassName="!text-black font-semibold"
+            className='w-full bg-primary'
+            size='lg'
+            textClassName='!text-black font-semibold'
           >
-            <View className="flex-row items-center justify-center">
-              <MapPinned size={20} color="black" />
-              <Text className="text-black font-semibold ml-2">
+            <View className='flex-row items-center justify-center'>
+              <MapPinned size={20} color='black' />
+              <Text className='text-black font-semibold ml-2'>
                 <TranslatedText>Get Directions</TranslatedText>
               </Text>
             </View>

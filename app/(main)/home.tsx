@@ -17,14 +17,12 @@ import { router } from "expo-router";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { SearchScreen } from "@/components/shared/SearchScreen";
+import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { useAppStore } from "@/store/useAppStore";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Bell } from "lucide-react-native";
 import { CategoryService } from "@/services/homeService";
-import type {
-  Category,
-  AllDataStructure,
-  HeroSlide,
-} from "@/types/homeTypes";
+import type { Category, AllDataStructure, HeroSlide } from "@/types/homeTypes";
 import { HeroSlider } from "@/components/main/HomeSections/HeroSlider";
 import { DynamicCategoriesSection } from "@/components/main/HomeSections/DynamicCategoriesSection";
 import { RecommendedSection } from "@/components/main/HomeSections/RecommendedSection";
@@ -32,9 +30,11 @@ import { ExploreSection } from "@/components/main/HomeSections/ExploreSection";
 
 export default function HomeScreen() {
   const { user } = useAppStore();
+  const { currentLanguage } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [showSearchScreen, setShowSearchScreen] = useState(false);
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
 
   // Data from service
   const [categories, setCategories] = useState<Category[]>([]);
@@ -43,6 +43,17 @@ export default function HomeScreen() {
     []
   );
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+
+  // Get current flag based on language
+  const getCurrentFlag = () => {
+    switch (currentLanguage) {
+      case "es":
+        return require("@/assets/images/spain-flag.png");
+      case "en":
+      default:
+        return require("@/assets/images/us-flag.png");
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -68,7 +79,6 @@ export default function HomeScreen() {
 
   const handleCategoryPress = (category: Category) => {
     console.log("Category pressed:", category.name);
-    // Navigate to explore screen with category filter
     router.push({
       pathname: "/(main)/explore",
       params: {
@@ -79,54 +89,91 @@ export default function HomeScreen() {
     });
   };
 
-  const handleExploreItemPress = (item: AllDataStructure) => {
-    console.log("Explore item pressed:", item.title);
-    // Navigate to explore detail screen
-    router.push({
-      pathname: "/(main)/detail/[id]",
-      params: {
-        id: item.id,
-        type: "explore",
-        title: item.title,
-        description: item.description || "",
-        location: item.location || "",
-        rating: item.rating?.toString() || "0",
-      },
-    });
-  };
+ const handleExploreItemPress = (item: AllDataStructure) => {
+   console.log("Explore item pressed:", item.title);
+   router.push({
+     pathname: "/(main)/detail/[id]" as const,
+     params: {
+       id: item.id,
+       // Pass the full item as JSON string for reliable data transfer
+       itemData: JSON.stringify({
+         id: item.id,
+         title: item.title || item.name,
+         name: item.name,
+         description: item.description || "",
+         location: item.location || "",
+         address: item.address || "",
+         rating: item.rating || 4.5,
+         dateRange: item.dateRange || "Available year-round",
+         price: item.price,
+         priceLevel: item.priceLevel,
+         category: item.categories?.[0] || "Attraction",
+         categories: item.categories,
+         phone: item.phone || "",
+         openingHours: item.openingHours || "",
+         latitude: item.latitude,
+         longitude: item.longitude,
+         images: item.images,
+         socialLinks: item.socialLinks,
+         type: item.type,
+         eventCount: item.eventCount,
+         isFeatured: item.isFeatured,
+         offlineSupported: item.offlineSupported,
+         offlineData: item.offlineData,
+       }),
+     },
+   });
+ };
 
-  const handleRecommendedItemPress = (item: AllDataStructure) => {
-    console.log("Recommended item pressed:", item.title);
-    // Navigate to recommended detail screen
-    router.push({
-      pathname: "/(main)/detail/[id]",
-      params: {
-        id: item.id,
-        type: "recommendation",
-        title: item.title,
-        description: item.description || "",
-        location: item.location || "",
-        dateRange: item.dateRange,
-        rating: item.rating?.toString() || "0",
-        price: item.price?.toString() || "0",
-      },
-    });
-  };
+ const handleRecommendedItemPress = (item: AllDataStructure) => {
+   console.log("Recommended item pressed:", item.title);
+   router.push({
+     pathname: "/(main)/detail/[id]" as const,
+     params: {
+       id: item.id,
+       // Pass the full item as JSON string for reliable data transfer
+       itemData: JSON.stringify({
+         id: item.id,
+         title: item.title || item.name,
+         name: item.name,
+         description: item.description || "",
+         location: item.location || "",
+         address: item.address || "",
+         rating: item.rating || 4.5,
+         dateRange: item.dateRange || "Available year-round",
+         price: item.price,
+         priceLevel: item.priceLevel,
+         category: item.categories?.[0] || "Attraction",
+         categories: item.categories,
+         phone: item.phone || "",
+         openingHours: item.openingHours || "",
+         latitude: item.latitude,
+         longitude: item.longitude,
+         images: item.images,
+         socialLinks: item.socialLinks,
+         type: item.type,
+         eventCount: item.eventCount,
+         isFeatured: item.isFeatured,
+         offlineSupported: item.offlineSupported,
+         offlineData: item.offlineData,
+       }),
+     },
+   });
+ };
+
 
   const handleHeroSlidePress = (slide: HeroSlide) => {
     console.log("Hero slide pressed:", slide.title);
-    // Navigate to slide action URL
     router.push("/(main)/explore");
   };
 
   const handleRecommendedSeeAll = () => {
     console.log("See all recommended pressed");
-    // Navigate to recommended list screen
     router.push("/(main)/recommendations");
   };
+
   const handleExploreSeeAll = () => {
-    console.log("See all recommended pressed");
-    // Navigate to recommended list screen
+    console.log("See all explore pressed");
     router.push("/(main)/explore");
   };
 
@@ -140,6 +187,14 @@ export default function HomeScreen() {
 
   const handleNotificationPress = () => {
     router.push("/(main)/map");
+  };
+
+  const handleLanguagePress = () => {
+    setShowLanguageSelector(true);
+  };
+
+  const handleLanguageSelect = () => {
+    setShowLanguageSelector(false);
   };
 
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
@@ -174,13 +229,20 @@ export default function HomeScreen() {
               </Text>
             </View>
             <View className='flex-row items-center space-x-3'>
-              <View className='w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'>
+              {/* Language Selector Button */}
+              <TouchableOpacity
+                onPress={handleLanguagePress}
+                className='w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'
+                activeOpacity={0.7}
+              >
                 <Image
-                  source={require("@/assets/images/us-flag.png")}
+                  source={getCurrentFlag()}
                   className='w-5 h-5'
                   resizeMode='contain'
                 />
-              </View>
+              </TouchableOpacity>
+
+              {/* Notification Button */}
               <TouchableOpacity
                 onPress={handleNotificationPress}
                 className='relative w-9 h-9 bg-white/40 rounded-full border border-[#E6E6E6] items-center justify-center p-2'
@@ -264,6 +326,13 @@ export default function HomeScreen() {
           onClose={() => setShowSearchScreen(false)}
         />
       </Modal>
+
+      {/* Language Selector Modal */}
+      <LanguageSelector
+        visible={showLanguageSelector}
+        onClose={() => setShowLanguageSelector(false)}
+        onLanguageSelect={handleLanguageSelect}
+      />
     </>
   );
 }

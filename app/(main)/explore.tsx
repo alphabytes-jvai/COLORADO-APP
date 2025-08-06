@@ -15,225 +15,235 @@ import { router, useLocalSearchParams } from "expo-router";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { ChevronLeft, Calendar, Star, X, Search } from "lucide-react-native";
+import { AllDataStructure } from "@/types/homeTypes";
 
 // Enhanced explore data with all categories
-const exploreData = [
+const exploreData: AllDataStructure[] = [
   // Hiking Category
   {
     id: "hiking-1",
-    category: "hiking",
     title: "Explore Colorado with the best and good locations here.",
-    date: "Jun 30 2025",
-    image: require("@/assets/images/hero1.png"),
-    isFavorite: false,
-    rating: 4.8,
     description:
       "Discover the most breathtaking hiking trails in Colorado with stunning mountain views and pristine wilderness.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/images/hero1.png")],
+    rating: 4.8,
+    categories: ["hiking"],
+    isFeatured: false,
   },
   {
     id: "hiking-2",
-    category: "hiking",
     title: "Find the finest and greatest places",
-    date: "Jun 30 2025",
-    image: require("@/assets/images/hero2.png"),
-    isFavorite: true,
-    rating: 4.9,
     description:
       "Experience the beauty of Colorado's natural landscapes with guided tours to the most scenic locations.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/images/hero2.png")],
+    rating: 4.9,
+    categories: ["hiking"],
+    isFeatured: true,
   },
   {
     id: "hiking-3",
-    category: "hiking",
     title: "The best sunset and sky view from the top of the hill of Colorado!",
-    date: "Jun 30 2025",
-    image: require("@/assets/images/hero3.png"),
-    isFavorite: false,
-    rating: 4.7,
     description:
       "Witness spectacular sunsets from Colorado's highest peaks with panoramic views that will take your breath away.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/images/hero3.png")],
+    rating: 4.7,
+    categories: ["hiking"],
+    isFeatured: false,
   },
+
   // Food Category
   {
     id: "food-1",
-    category: "food",
     title: "Best Local Restaurants and Cafes in Colorado",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend1.png"),
-    isFavorite: false,
-    rating: 4.6,
     description:
       "Discover amazing local cuisine and hidden culinary gems across Colorado.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend1.png")],
+    rating: 4.6,
+    categories: ["food"],
+    isFeatured: false,
   },
   {
     id: "food-2",
-    category: "food",
     title: "Farm to Table Dining Experiences",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend2.png"),
-    isFavorite: false,
-    rating: 4.8,
     description:
       "Experience fresh, locally sourced ingredients in Colorado's finest restaurants.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend2.png")],
+    rating: 4.8,
+    categories: ["food"],
+    isFeatured: false,
   },
   {
     id: "food-3",
-    category: "food",
     title: "Colorado Craft Beer and Brewery Tours",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend3.png"),
-    isFavorite: true,
-    rating: 4.7,
     description:
       "Explore Colorado's thriving craft beer scene with guided brewery tours.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend3.png")],
+    rating: 4.7,
+    categories: ["food"],
+    isFeatured: true,
   },
+
   // Store Category
   {
     id: "store-1",
-    category: "store",
     title: "Local Artisan Shops and Markets",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend4.png"),
-    isFavorite: false,
-    rating: 4.5,
     description:
       "Find unique handcrafted items and local products in Colorado's artisan shops.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend4.png")],
+    rating: 4.5,
+    categories: ["store"],
+    isFeatured: false,
   },
   {
     id: "store-2",
-    category: "store",
     title: "Colorado Outdoor Gear Stores",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend5.png"),
-    isFavorite: false,
-    rating: 4.7,
     description:
       "Get equipped for your Colorado adventures at the best outdoor gear stores.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend5.png")],
+    rating: 4.7,
+    categories: ["store"],
+    isFeatured: false,
   },
   {
     id: "store-3",
-    category: "store",
     title: "Vintage and Antique Shopping Districts",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend6.png"),
-    isFavorite: false,
-    rating: 4.4,
     description:
       "Discover unique vintage finds and antiques in Colorado's historic districts.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend6.png")],
+    rating: 4.4,
+    categories: ["store"],
+    isFeatured: false,
   },
+
   // Concert Category
   {
     id: "concert-1",
-    category: "concert",
     title: "Red Rocks Amphitheatre Events",
-    date: "Jun 30 2025",
-    image: require("@/assets/images/hero1.png"),
-    isFavorite: true,
-    rating: 4.9,
     description:
       "Experience world-class performances at Colorado's iconic Red Rocks venue.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/images/hero1.png")],
+    rating: 4.9,
+    categories: ["concert"],
+    isFeatured: true,
   },
   {
     id: "concert-2",
-    category: "concert",
     title: "Denver Music Scene and Live Venues",
-    date: "Jun 30 2025",
-    image: require("@/assets/images/hero2.png"),
-    isFavorite: false,
-    rating: 4.6,
     description:
       "Explore Denver's vibrant music scene with live performances across the city.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/images/hero2.png")],
+    rating: 4.6,
+    categories: ["concert"],
+    isFeatured: false,
   },
+
   // Towns Category
   {
     id: "towns-1",
-    category: "towns",
     title: "Historic Mountain Towns of Colorado",
-    date: "Jun 30 2025",
-    image: require("@/assets/images/hero3.png"),
-    isFavorite: false,
-    rating: 4.8,
     description:
       "Visit charming historic mountain towns with rich Colorado heritage.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/images/hero3.png")],
+    rating: 4.8,
+    categories: ["towns"],
+    isFeatured: false,
   },
   {
     id: "towns-2",
-    category: "towns",
     title: "Aspen and Vail: Luxury Mountain Destinations",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend1.png"),
-    isFavorite: false,
-    rating: 4.7,
     description:
       "Experience luxury and natural beauty in Colorado's premier mountain towns.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend1.png")],
+    rating: 4.7,
+    categories: ["towns"],
+    isFeatured: false,
   },
+
   // Events Category
   {
     id: "events-1",
-    category: "events",
     title: "Colorado Festivals and Seasonal Events",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend2.png"),
-    isFavorite: false,
-    rating: 4.6,
     description:
       "Join exciting festivals and events happening throughout Colorado.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend2.png")],
+    rating: 4.6,
+    categories: ["events"],
+    isFeatured: false,
   },
   {
     id: "events-2",
-    category: "events",
     title: "Summer Music Festivals in the Rockies",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend3.png"),
-    isFavorite: true,
-    rating: 4.8,
     description:
       "Dance and sing along at Colorado's amazing summer music festivals.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend3.png")],
+    rating: 4.8,
+    categories: ["events"],
+    isFeatured: true,
   },
+
   // Resources Category
   {
     id: "resources-1",
-    category: "resources",
     title: "Colorado Visitor Centers and Information",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend4.png"),
-    isFavorite: false,
-    rating: 4.5,
     description:
       "Get helpful information and resources for your Colorado adventure.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend4.png")],
+    rating: 4.5,
+    categories: ["resources"],
+    isFeatured: false,
   },
   {
     id: "resources-2",
-    category: "resources",
     title: "Emergency Services and Safety Information",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend5.png"),
-    isFavorite: false,
-    rating: 4.7,
     description:
       "Stay safe with important emergency contacts and safety resources.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend5.png")],
+    rating: 4.7,
+    categories: ["resources"],
+    isFeatured: false,
   },
-  // Additional categories for completeness
+
+  // Attractions Category
   {
     id: "attractions-1",
-    category: "attraction",
     title: "Colorado National Parks and Monuments",
-    date: "Jun 30 2025",
-    image: require("@/assets/recommend/recommend6.png"),
-    isFavorite: false,
-    rating: 4.9,
     description:
       "Explore Colorado's stunning national parks and historic monuments.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/recommend/recommend6.png")],
+    rating: 4.9,
+    categories: ["attraction"],
+    isFeatured: false,
   },
+
+  // Local Business Category
   {
     id: "business-1",
-    category: "local business",
     title: "Support Local Colorado Businesses",
-    date: "Jun 30 2025",
-    image: require("@/assets/images/hero1.png"),
-    isFavorite: false,
-    rating: 4.6,
     description:
       "Discover and support amazing local businesses across Colorado.",
+    dateRange: "Jun 30 2025",
+    images: [require("@/assets/images/hero1.png")],
+    rating: 4.6,
+    categories: ["local business"],
+    isFeatured: false,
   },
 ];
 
@@ -301,20 +311,27 @@ export default function ExploreScreen() {
 
     // Filter by category if specified
     if (selectedCategory && selectedCategory !== "all") {
-      filtered = filtered.filter(
-        (item) => item.category.toLowerCase() === selectedCategory.toLowerCase()
+      filtered = filtered.filter((item) =>
+        item.categories?.some(
+          (cat) => cat.toLowerCase() === selectedCategory.toLowerCase()
+        )
       );
     }
 
     // Filter by search text
     if (searchText.trim()) {
       const searchLower = searchText.toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          item.title.toLowerCase().includes(searchLower) ||
-          item.category.toLowerCase().includes(searchLower) ||
-          item.description.toLowerCase().includes(searchLower)
-      );
+      filtered = filtered.filter((item) => {
+        const title = item.title || item.name || "";
+        const description = item.description || "";
+        const categories = item.categories || [];
+
+        return (
+          title.toLowerCase().includes(searchLower) ||
+          description.toLowerCase().includes(searchLower) ||
+          categories.some((cat) => cat.toLowerCase().includes(searchLower))
+        );
+      });
     }
 
     setFilteredData(filtered);
@@ -341,17 +358,36 @@ export default function ExploreScreen() {
     setFavorites(newFavorites);
   };
 
-  const handleItemPress = (item: any) => {
+  const handleItemPress = (item: AllDataStructure) => {
     router.push({
-      pathname: "/(main)/detail/[id]",
+      pathname: "/(main)/detail/[id]" as const,
       params: {
         id: item.id,
-        type: "explore",
-        title: item.title,
-        description: item.description,
-        date: item.date,
-        rating: item.rating.toString(),
-        category: item.category,
+        itemData: JSON.stringify({
+          id: item.id,
+          type: "explore",
+          title: item.title || item.name || "Untitled",
+          name: item.name || item.title || "Untitled",
+          description: item.description || "",
+          location: item.location || "",
+          address: item.address || "",
+          rating: item.rating || 4.5,
+          dateRange: item.dateRange || "Available year-round",
+          price: item.price,
+          priceLevel: item.priceLevel,
+          category: item.categories?.[0] || "Attraction",
+          categories: item.categories || [],
+          phone: item.phone || "",
+          openingHours: item.openingHours || "",
+          latitude: item.latitude,
+          longitude: item.longitude,
+          images: item.images || [],
+          socialLinks: item.socialLinks,
+          eventCount: item.eventCount,
+          isFeatured: item.isFeatured || false,
+          offlineSupported: item.offlineSupported,
+          offlineData: item.offlineData,
+        }),
       },
     });
   };
@@ -359,8 +395,9 @@ export default function ExploreScreen() {
   // Group filtered data by category for better organization
   const groupedData = filteredData.reduce(
     (acc, item) => {
+      const primaryCategory = item.categories?.[0] || "other";
       const categoryKey =
-        item.category.charAt(0).toUpperCase() + item.category.slice(1);
+        primaryCategory.charAt(0).toUpperCase() + primaryCategory.slice(1);
       if (!acc[categoryKey]) {
         acc[categoryKey] = [];
       }
@@ -370,65 +407,74 @@ export default function ExploreScreen() {
     {} as Record<string, typeof exploreData>
   );
 
-  const renderExploreItem = (item: any) => (
-    <TouchableOpacity
-      key={item.id}
-      onPress={() => handleItemPress(item)}
-      className='mb-4'
-      activeOpacity={0.7}
-    >
-      <View className='bg-white rounded-lg overflow-hidden shadow-sm'>
-        <View className='relative h-72'>
-          <Image
-            source={item.image}
-            className='w-full h-full'
-            resizeMode='cover'
-          />
-          <View className='absolute inset-0 bg-black/30' />
+  const renderExploreItem = (item: AllDataStructure) => {
+    const title = item.title || item.name || "Untitled";
+    const rating = item.rating || 4.5;
+    const dateRange = item.dateRange || "Available";
+    const primaryCategory = item.categories?.[0] || "attraction";
+    const imageSource =
+      item.images?.[0] || require("@/assets/images/hero1.png");
 
-          {/* Rating badge */}
-          <View className='absolute top-4 left-4 bg-black/50 rounded-full px-2 py-1 flex-row items-center'>
-            <Star size={12} color='#FFD700' fill='#FFD700' />
-            <Text className='text-white text-xs ml-1 font-medium'>
-              {item.rating}
-            </Text>
-          </View>
-
-          {/* Favorite button */}
-          <TouchableOpacity
-            onPress={() => toggleFavorite(item.id)}
-            className='absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full items-center justify-center'
-          >
-            <Star
-              size={20}
-              color={favorites.has(item.id) ? "#FFD700" : "white"}
-              fill={favorites.has(item.id) ? "#FFD700" : "transparent"}
+    return (
+      <TouchableOpacity
+        key={item.id}
+        onPress={() => handleItemPress(item)}
+        className='mb-4'
+        activeOpacity={0.7}
+      >
+        <View className='bg-white rounded-lg overflow-hidden shadow-sm'>
+          <View className='relative h-72'>
+            <Image
+              source={imageSource}
+              className='w-full h-full'
+              resizeMode='cover'
             />
-          </TouchableOpacity>
+            <View className='absolute inset-0 bg-black/30' />
 
-          {/* Content overlay */}
-          <View className='absolute bottom-0 left-0 right-0 p-4'>
-            <Text className='text-white text-lg font-bold mb-2 leading-tight'>
-              <TranslatedText>{item.title}</TranslatedText>
-            </Text>
-            <View className='flex-row items-center justify-between'>
-              <View className='flex-row items-center flex-1'>
-                <Calendar size={16} color='white' />
-                <Text className='text-white text-sm ml-2'>
-                  <TranslatedText>{item.date}</TranslatedText>
-                </Text>
-              </View>
-              <View className='bg-white/20 rounded-full px-2 py-1'>
-                <Text className='text-white text-xs font-medium capitalize'>
-                  {item.category}
-                </Text>
+            {/* Rating badge */}
+            <View className='absolute top-4 left-4 bg-black/50 rounded-full px-2 py-1 flex-row items-center'>
+              <Star size={12} color='#FFD700' fill='#FFD700' />
+              <Text className='text-white text-xs ml-1 font-medium'>
+                {rating.toFixed(1)}
+              </Text>
+            </View>
+
+            {/* Favorite button */}
+            <TouchableOpacity
+              onPress={() => toggleFavorite(item.id)}
+              className='absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full items-center justify-center'
+            >
+              <Star
+                size={20}
+                color={favorites.has(item.id) ? "#FFD700" : "white"}
+                fill={favorites.has(item.id) ? "#FFD700" : "transparent"}
+              />
+            </TouchableOpacity>
+
+            {/* Content overlay */}
+            <View className='absolute bottom-0 left-0 right-0 p-4'>
+              <Text className='text-white text-lg font-bold mb-2 leading-tight'>
+                <TranslatedText>{title}</TranslatedText>
+              </Text>
+              <View className='flex-row items-center justify-between'>
+                <View className='flex-row items-center flex-1'>
+                  <Calendar size={16} color='white' />
+                  <Text className='text-white text-sm ml-2'>
+                    <TranslatedText>{dateRange}</TranslatedText>
+                  </Text>
+                </View>
+                <View className='bg-white/20 rounded-full px-2 py-1'>
+                  <Text className='text-white text-xs font-medium capitalize'>
+                    {primaryCategory}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   // Get page title with proper type handling
   const getPageTitle = (): string => {
@@ -442,8 +488,10 @@ export default function ExploreScreen() {
     }
     return "Explore";
   };
+
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
     Dimensions.get("window");
+
   return (
     <SafeAreaView className='flex-1 bg-surface'>
       <View className='absolute top-0 left-0 right-0'>
@@ -456,6 +504,7 @@ export default function ExploreScreen() {
           resizeMode='cover'
         />
       </View>
+
       {/* Header */}
       <View className='flex-row items-center justify-between px-5 py-3'>
         {/* Back button */}
