@@ -5,7 +5,6 @@ export default function ScreenLayout() {
   return (
     <Stack>
       <Stack.Screen name="notifications" options={{ headerShown: false }} />
-      <Stack.Screen name="privacy-policy" options={{ headerShown: false }} />
       <Stack.Screen name="explore-navigate" options={{ headerShown: false }} />
       <Stack.Screen name="offline-maps" options={{ headerShown: false }} />
       <Stack.Screen name="help-support" options={{ headerShown: false }} />
