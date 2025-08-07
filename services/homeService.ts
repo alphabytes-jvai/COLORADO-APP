@@ -135,7 +135,7 @@ export class CategoryService {
         id: "15",
         name: "Shopping",
         icon: "🛍️",
-        image: require("@/assets/categories/shopping.png"),
+        image: require("@/assets/categories/store.png"),
         color: "lime",
         priority: 15,
         isActive: true,
@@ -223,7 +223,7 @@ export class CategoryService {
         description: "Must-visit attractions in the heart of Denver",
         rating: 4.8,
         dateRange: "Year-round",
-        images: [require("@/assets/explores/explore5.png")],
+        images: [require("@/assets/explores/explore2.png")],
         isFeatured: true,
         phone: "(303) 892-1112",
         socialLinks: {
@@ -248,7 +248,7 @@ export class CategoryService {
         description: "Vibrant festivals and cultural events",
         rating: 4.6,
         dateRange: "Seasonal",
-        images: [require("@/assets/explores/explore6.png")],
+        images: [require("@/assets/explores/explore3.png")],
         isFeatured: false,
         phone: "(719) 635-7506",
         socialLinks: {

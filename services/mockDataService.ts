@@ -372,7 +372,7 @@ export class MockDataService {
         dateRange: "Seasonal",
         images: [
           require("@/assets/recommend/recommend8.png"),
-          require("@/assets/explores/explore5.png"),
+          require("@/assets/explores/explore1.png"),
         ],
         isFeatured: true,
         phone: "(970) 925-3445",
