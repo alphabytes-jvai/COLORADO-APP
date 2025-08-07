@@ -15,11 +15,13 @@ export interface User {
     state?: string;
     zipCode?: string;
     country?: string;
+    [key: string]: any;
   };
   preferences?: {
     language?: string;
     currency?: string;
     notifications?: boolean;
+    [key: string]: any;
   };
   createdAt?: string;
   updatedAt?: string;
