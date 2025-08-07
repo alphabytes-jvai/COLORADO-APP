@@ -774,9 +774,12 @@ export default function ExploreNavigateScreen() {
               onPress={() => handleMarkerPress(location)}
               image={
                 destinationLocation?.id === location.id
-                  ? pinDestination // #BF0600 with transparent center for destination
-                  : pinRegular // #22c55e with transparent center for others
+                  ? pinDestination
+                  : pinRegular
               }
+              anchor={{ x: 0.5, y: 1 }} // Center horizontally, bottom vertically (typical pin behavior)
+              centerOffset={{ x: 0, y: -15 }} // Adjust vertical offset if needed
+              style={{ transform: [{ scale: 0.6 }] }} // Scale down to 60% of original size
             />
           ))}
 
@@ -795,6 +798,9 @@ export default function ExploreNavigateScreen() {
                 }
                 onPress={() => handleMarkerPress(destinationLocation)}
                 image={pinDestination} // Red pin for destination
+                anchor={{ x: 0.5, y: 1 }}
+                centerOffset={{ x: 0, y: -15 }}
+                style={{ transform: [{ scale: 0.6 }] }}
               />
             )}
 
