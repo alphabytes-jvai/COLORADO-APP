@@ -1,6 +1,14 @@
 // app/(auth)/sign-in.tsx
 import { useState } from "react";
-import { View, Text, TouchableOpacity, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -73,90 +81,105 @@ export default function SignInScreen() {
         titleClassName="text-black text-2xl font-semibold text-center leading-8"
         showBackButton={true}
       />
-      <View className="flex-1 px-5" style={{ marginTop: SCREEN_HEIGHT * 0.25 }}>
-        {/* Form */}
-        <View className="flex-1">
-          {__DEV__ && (
-            <View className="mb-4 p-3 bg-yellow-100 rounded-md">
-              <Text className="text-xs text-yellow-800">
-                🚧 DEV MODE: Default credentials loaded
-              </Text>
-            </View>
-          )}
 
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label={t("Email")}
-                placeholder={t("Enter your email")}
-                value={value}
-                onChangeText={onChange}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                icon={<Mail size={20} color="#4DBA28" />}
-                iconPosition="left"
-                error={
-                  errors.email?.message ? t(errors.email.message) : undefined
-                }
-              />
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            paddingTop: SCREEN_HEIGHT * 0.25,
+            paddingBottom: 50,
+          }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Form */}
+          <View className="flex-1 bg-surface/90 rounded-t-lg p-5">
+            {__DEV__ && (
+              <View className="mb-4 p-3 bg-yellow-100 rounded-md">
+                <Text className="text-xs text-yellow-800">
+                  🚧 DEV MODE: Default credentials loaded
+                </Text>
+              </View>
             )}
-          />
 
-          {/* Custom Password Input */}
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label={t("Password")}
-                placeholder={t("Enter your password")}
-                value={value}
-                onChangeText={onChange}
-                icon={<Lock size={20} color="#4DBA28" />}
-                iconPosition="left"
-                secureTextEntry={!showPassword}
-                error={
-                  errors.password?.message
-                    ? t(errors.password.message)
-                    : undefined
-                }
-              />
-            )}
-          />
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label={t("Email")}
+                  placeholder={t("Enter your email")}
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  icon={<Mail size={20} color="#4DBA28" />}
+                  iconPosition="left"
+                  error={
+                    errors.email?.message ? t(errors.email.message) : undefined
+                  }
+                />
+              )}
+            />
 
-          <TouchableOpacity
-            onPress={() => router.push("/(auth)/forgot-password")}
-            className="self-end mb-10"
-          >
-            <Text className="text-primary-dark font-medium">
-              <TranslatedText>Forget password</TranslatedText>
-            </Text>
-          </TouchableOpacity>
+            {/* Custom Password Input */}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label={t("Password")}
+                  placeholder={t("Enter your password")}
+                  value={value}
+                  onChangeText={onChange}
+                  icon={<Lock size={20} color="#4DBA28" />}
+                  iconPosition="left"
+                  secureTextEntry={!showPassword}
+                  error={
+                    errors.password?.message
+                      ? t(errors.password.message)
+                      : undefined
+                  }
+                />
+              )}
+            />
 
-          <Button
-            onPress={handleSubmit(onSubmit)}
-            loading={isLoading}
-            className="w-full mb-5"
-            size="md"
-            textClassName="!text-black"
-          >
-            <TranslatedText>Login</TranslatedText>
-          </Button>
-
-          <View className="flex-row justify-center">
-            <Text className="text-gray-600">
-              <TranslatedText>Don&apos;t have an account? </TranslatedText>
-            </Text>
-            <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
+            <TouchableOpacity
+              onPress={() => router.push("/(auth)/forgot-password")}
+              className="self-end mb-10"
+            >
               <Text className="text-primary-dark font-medium">
-                <TranslatedText>Sign Up</TranslatedText>
+                <TranslatedText>Forget password</TranslatedText>
               </Text>
             </TouchableOpacity>
+
+            <Button
+              onPress={handleSubmit(onSubmit)}
+              loading={isLoading}
+              className="w-full mb-5"
+              size="md"
+              textClassName="!text-black"
+            >
+              <TranslatedText>Login</TranslatedText>
+            </Button>
+
+            <View className="flex-row justify-center">
+              <Text className="text-gray-600">
+                <TranslatedText>Don&apos;t have an account? </TranslatedText>
+              </Text>
+              <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
+                <Text className="text-primary-dark font-medium">
+                  <TranslatedText>Sign Up</TranslatedText>
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

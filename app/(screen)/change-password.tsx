@@ -10,6 +10,8 @@ import {
   ImageBackground,
   Dimensions,
   DimensionValue,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TranslatedText } from "@/components/ui/TranslatedText";
@@ -241,228 +243,255 @@ export default function ChangePasswordScreen() {
         <View className="w-8 h-8" />
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Info Section */}
-        <View className="mx-5 mt-5 mb-6">
-          <View className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <View className="flex-row items-center mb-2">
-              <Shield size={20} color="#3B82F6" />
-              <Text className="text-blue-800 font-semibold ml-2">
-                <TranslatedText>Security Tip</TranslatedText>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Info Section */}
+          <View className="mx-5 mt-5 mb-6">
+            <View className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <View className="flex-row items-center mb-2">
+                <Shield size={20} color="#3B82F6" />
+                <Text className="text-blue-800 font-semibold ml-2">
+                  <TranslatedText>Security Tip</TranslatedText>
+                </Text>
+              </View>
+              <Text className="text-blue-700 text-sm">
+                <TranslatedText>
+                  Choose a strong password with at least 8 characters, including
+                  uppercase and lowercase letters, numbers, and special
+                  characters.
+                </TranslatedText>
               </Text>
             </View>
-            <Text className="text-blue-700 text-sm">
-              <TranslatedText>
-                Choose a strong password with at least 8 characters, including
-                uppercase and lowercase letters, numbers, and special
-                characters.
-              </TranslatedText>
-            </Text>
-          </View>
-        </View>
-
-        {/* Password Form */}
-        <View className="bg-white mx-5 rounded-lg border border-gray-200 p-4">
-          <Text className="text-lg font-semibold text-black mb-4">
-            <TranslatedText>Update Password</TranslatedText>
-          </Text>
-
-          {/* Current Password */}
-          <View className="mb-4">
-            <Text className="text-sm font-medium text-gray-700 mb-2">
-              <TranslatedText>Current Password</TranslatedText>
-            </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2">
-              <Key size={16} color="#6B7280" />
-              <TextInput
-                value={formData.currentPassword}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, currentPassword: text })
-                }
-                placeholder="Enter current password"
-                secureTextEntry={!showCurrentPassword}
-                className="flex-1 ml-3 text-base text-gray-900"
-              />
-              <TouchableOpacity
-                onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-              >
-                {showCurrentPassword ? (
-                  <EyeOff size={16} color="#6B7280" />
-                ) : (
-                  <Eye size={16} color="#6B7280" />
-                )}
-              </TouchableOpacity>
-            </View>
           </View>
 
-          {/* New Password */}
-          <View className="mb-4">
-            <Text className="text-sm font-medium text-gray-700 mb-2">
-              <TranslatedText>New Password</TranslatedText>
+          {/* Password Form */}
+          <View className="bg-white mx-5 rounded-lg border border-gray-200 p-4">
+            <Text className="text-lg font-semibold text-black mb-4">
+              <TranslatedText>Update Password</TranslatedText>
             </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2">
-              <Key size={16} color="#6B7280" />
-              <TextInput
-                value={formData.newPassword}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, newPassword: text })
-                }
-                placeholder="Enter new password"
-                secureTextEntry={!showNewPassword}
-                className="flex-1 ml-3 text-base text-gray-900"
-              />
-              <TouchableOpacity
-                onPress={() => setShowNewPassword(!showNewPassword)}
-              >
-                {showNewPassword ? (
-                  <EyeOff size={16} color="#6B7280" />
-                ) : (
-                  <Eye size={16} color="#6B7280" />
-                )}
-              </TouchableOpacity>
+
+            {/* Current Password */}
+            <View className="mb-4">
+              <Text className="text-sm font-medium text-gray-700 mb-2">
+                <TranslatedText>Current Password</TranslatedText>
+              </Text>
+              <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2">
+                <Key size={16} color="#6B7280" />
+                <TextInput
+                  value={formData.currentPassword}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, currentPassword: text })
+                  }
+                  placeholder="Enter current password"
+                  secureTextEntry={!showCurrentPassword}
+                  className="flex-1 ml-3 text-base text-gray-900"
+                  style={{
+                    paddingVertical: 12,
+                    lineHeight: 20,
+                    textAlignVertical: "center",
+                  }}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff size={16} color="#6B7280" />
+                  ) : (
+                    <Eye size={16} color="#6B7280" />
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
 
-            {/* Password Strength Indicator */}
-            {formData.newPassword.length > 0 && (
-              <View className="mt-3">
-                <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-sm text-gray-600">
-                    <TranslatedText>Password Strength:</TranslatedText>
-                  </Text>
-                  <Text
-                    className="text-sm font-medium capitalize"
-                    style={{ color: getStrengthColor() }}
-                  >
-                    <TranslatedText>{passwordStrength.strength}</TranslatedText>
-                  </Text>
-                </View>
-                <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <View
-                    className="h-full rounded-full"
-                    style={{
-                      backgroundColor: getStrengthColor(),
-                      width: getStrengthWidth(),
-                    }}
-                  />
-                </View>
+            {/* New Password */}
+            <View className="mb-4">
+              <Text className="text-sm font-medium text-gray-700 mb-2">
+                <TranslatedText>New Password</TranslatedText>
+              </Text>
+              <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2">
+                <Key size={16} color="#6B7280" />
+                <TextInput
+                  value={formData.newPassword}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, newPassword: text })
+                  }
+                  placeholder="Enter new password"
+                  secureTextEntry={!showNewPassword}
+                  className="flex-1 ml-3 text-base text-gray-900"
+                  style={{
+                    paddingVertical: 12,
+                    lineHeight: 20,
+                    textAlignVertical: "center",
+                  }}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? (
+                    <EyeOff size={16} color="#6B7280" />
+                  ) : (
+                    <Eye size={16} color="#6B7280" />
+                  )}
+                </TouchableOpacity>
+              </View>
 
-                {/* Password Requirements */}
-                <View className="mt-3 space-y-1">
-                  {[
-                    { key: "length", text: "At least 8 characters" },
-                    { key: "uppercase", text: "One uppercase letter" },
-                    { key: "lowercase", text: "One lowercase letter" },
-                    { key: "numbers", text: "One number" },
-                    { key: "special", text: "One special character" },
-                  ].map((requirement) => (
-                    <View
-                      key={requirement.key}
-                      className="flex-row items-center mb-1"
+              {/* Password Strength Indicator */}
+              {formData.newPassword.length > 0 && (
+                <View className="mt-3">
+                  <View className="flex-row items-center justify-between mb-2">
+                    <Text className="text-sm text-gray-600">
+                      <TranslatedText>Password Strength:</TranslatedText>
+                    </Text>
+                    <Text
+                      className="text-sm font-medium capitalize"
+                      style={{ color: getStrengthColor() }}
                     >
-                      {passwordStrength.checks[
-                        requirement.key as keyof typeof passwordStrength.checks
-                      ] ? (
-                        <CheckCircle size={12} color="#10B981" />
-                      ) : (
-                        <X size={12} color="#EF4444" />
-                      )}
-                      <Text
-                        className={`text-xs ml-2 ${
-                          passwordStrength.checks[
-                            requirement.key as keyof typeof passwordStrength.checks
-                          ]
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                      <TranslatedText>
+                        {passwordStrength.strength}
+                      </TranslatedText>
+                    </Text>
+                  </View>
+                  <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <View
+                      className="h-full rounded-full"
+                      style={{
+                        backgroundColor: getStrengthColor(),
+                        width: getStrengthWidth(),
+                      }}
+                    />
+                  </View>
+
+                  {/* Password Requirements */}
+                  <View className="mt-3 space-y-1">
+                    {[
+                      { key: "length", text: "At least 8 characters" },
+                      { key: "uppercase", text: "One uppercase letter" },
+                      { key: "lowercase", text: "One lowercase letter" },
+                      { key: "numbers", text: "One number" },
+                      { key: "special", text: "One special character" },
+                    ].map((requirement) => (
+                      <View
+                        key={requirement.key}
+                        className="flex-row items-center mb-1"
                       >
-                        <TranslatedText>{requirement.text}</TranslatedText>
-                      </Text>
-                    </View>
-                  ))}
+                        {passwordStrength.checks[
+                          requirement.key as keyof typeof passwordStrength.checks
+                        ] ? (
+                          <CheckCircle size={12} color="#10B981" />
+                        ) : (
+                          <X size={12} color="#EF4444" />
+                        )}
+                        <Text
+                          className={`text-xs ml-2 ${
+                            passwordStrength.checks[
+                              requirement.key as keyof typeof passwordStrength.checks
+                            ]
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          <TranslatedText>{requirement.text}</TranslatedText>
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-              </View>
-            )}
-          </View>
-
-          {/* Confirm Password */}
-          <View className="mb-6">
-            <Text className="text-sm font-medium text-gray-700 mb-2">
-              <TranslatedText>Confirm New Password</TranslatedText>
-            </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2">
-              <Key size={16} color="#6B7280" />
-              <TextInput
-                value={formData.confirmPassword}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, confirmPassword: text })
-                }
-                placeholder="Confirm new password"
-                secureTextEntry={!showConfirmPassword}
-                className="flex-1 ml-3 text-base text-gray-900"
-              />
-              <TouchableOpacity
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff size={16} color="#6B7280" />
-                ) : (
-                  <Eye size={16} color="#6B7280" />
-                )}
-              </TouchableOpacity>
-            </View>
-            {formData.confirmPassword.length > 0 &&
-              formData.newPassword !== formData.confirmPassword && (
-                <Text className="text-red-600 text-sm mt-2">
-                  <TranslatedText>Passwords don&lsquo;t match</TranslatedText>
-                </Text>
               )}
-          </View>
+            </View>
 
-          {/* Change Password Button */}
-          <Button
-            onPress={handleChangePassword}
-            disabled={loading || passwordStrength.strength === "weak"}
-            className="w-full bg-primary"
-            size="lg"
-            textClassName="!text-black font-semibold"
-          >
-            {loading ? (
-              <View className="flex-row items-center">
-                <ActivityIndicator size="small" color="#000" />
-                <Text className="ml-2 text-black font-semibold">
-                  <TranslatedText>Updating...</TranslatedText>
-                </Text>
+            {/* Confirm Password */}
+            <View className="mb-6">
+              <Text className="text-sm font-medium text-gray-700 mb-2">
+                <TranslatedText>Confirm New Password</TranslatedText>
+              </Text>
+              <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2">
+                <Key size={16} color="#6B7280" />
+                <TextInput
+                  value={formData.confirmPassword}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, confirmPassword: text })
+                  }
+                  placeholder="Confirm new password"
+                  secureTextEntry={!showConfirmPassword}
+                  className="flex-1 ml-3 text-base text-gray-900"
+                  style={{
+                    paddingVertical: 12,
+                    lineHeight: 20,
+                    textAlignVertical: "center",
+                  }}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={16} color="#6B7280" />
+                  ) : (
+                    <Eye size={16} color="#6B7280" />
+                  )}
+                </TouchableOpacity>
               </View>
-            ) : (
-              <TranslatedText>Change Password</TranslatedText>
-            )}
-          </Button>
-        </View>
+              {formData.confirmPassword.length > 0 &&
+                formData.newPassword !== formData.confirmPassword && (
+                  <Text className="text-red-600 text-sm mt-2">
+                    <TranslatedText>Passwords don&lsquo;t match</TranslatedText>
+                  </Text>
+                )}
+            </View>
 
-        {/* Additional Security Tips */}
-        <View className="mx-5 mt-6 mb-8">
-          <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-            <Text className="text-yellow-800 font-semibold mb-2">
-              <TranslatedText>Password Security Tips</TranslatedText>
-            </Text>
-            <Text className="text-yellow-700 text-sm mb-2">
-              <TranslatedText>
-                • Use a unique password that you don&lsquo;t use elsewhere
-              </TranslatedText>
-            </Text>
-            <Text className="text-yellow-700 text-sm mb-2">
-              <TranslatedText>
-                • Avoid using personal information in passwords
-              </TranslatedText>
-            </Text>
-            <Text className="text-yellow-700 text-sm mb-2">
-              <TranslatedText>
-                • Consider using a password manager
-              </TranslatedText>
-            </Text>
+            {/* Change Password Button */}
+            <Button
+              onPress={handleChangePassword}
+              disabled={loading || passwordStrength.strength === "weak"}
+              className="w-full bg-primary"
+              size="lg"
+              textClassName="!text-black font-semibold"
+            >
+              {loading ? (
+                <View className="flex-row items-center">
+                  <ActivityIndicator size="small" color="#000" />
+                  <Text className="ml-2 text-black font-semibold">
+                    <TranslatedText>Updating...</TranslatedText>
+                  </Text>
+                </View>
+              ) : (
+                <TranslatedText>Change Password</TranslatedText>
+              )}
+            </Button>
           </View>
-        </View>
-      </ScrollView>
+
+          {/* Additional Security Tips */}
+          <View className="mx-5 mt-6 mb-8">
+            <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <Text className="text-yellow-800 font-semibold mb-2">
+                <TranslatedText>Password Security Tips</TranslatedText>
+              </Text>
+              <Text className="text-yellow-700 text-sm mb-2">
+                <TranslatedText>
+                  • Use a unique password that you don&lsquo;t use elsewhere
+                </TranslatedText>
+              </Text>
+              <Text className="text-yellow-700 text-sm mb-2">
+                <TranslatedText>
+                  • Avoid using personal information in passwords
+                </TranslatedText>
+              </Text>
+              <Text className="text-yellow-700 text-sm mb-2">
+                <TranslatedText>
+                  • Consider using a password manager
+                </TranslatedText>
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

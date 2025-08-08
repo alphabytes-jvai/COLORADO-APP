@@ -685,14 +685,14 @@ export default function ExploreNavigateScreen() {
   const renderLocationItem = ({ item }: { item: AllDataStructure }) => (
     <TouchableOpacity
       onPress={() => handleLocationSelect(item)}
-      className='p-4 border-b border-gray-100 bg-white'
+      className="p-4 border-b border-gray-100 bg-white"
       style={[
         styles.locationItem,
         item.type === "External Location" && { borderLeftColor: "#3b82f6" },
       ]}
       activeOpacity={0.7}
     >
-      <View className='flex-row items-start'>
+      <View className="flex-row items-start">
         <View
           className={`p-2 rounded-lg mr-3 ${
             item.type === "External Location" ? "bg-blue-100" : "bg-green-100"
@@ -703,22 +703,22 @@ export default function ExploreNavigateScreen() {
             color={item.type === "External Location" ? "#3b82f6" : "#22c55e"}
           />
         </View>
-        <View className='flex-1'>
+        <View className="flex-1">
           <Text
-            className='font-semibold text-black text-base'
+            className="font-semibold text-black text-base"
             numberOfLines={1}
           >
             {item.name || item.title}
           </Text>
-          <Text className='text-sm text-gray-600 mt-1' numberOfLines={2}>
+          <Text className="text-sm text-gray-600 mt-1" numberOfLines={2}>
             {item.address || item.location}
           </Text>
           {item.description && (
-            <Text className='text-xs text-gray-500 mt-1' numberOfLines={1}>
+            <Text className="text-xs text-gray-500 mt-1" numberOfLines={1}>
               {item.description}
             </Text>
           )}
-          <View className='flex-row items-center justify-between mt-2'>
+          <View className="flex-row items-center justify-between mt-2">
             <Text
               className={`text-xs font-medium px-2 py-1 rounded ${
                 item.type === "External Location"
@@ -729,9 +729,9 @@ export default function ExploreNavigateScreen() {
               {item.type}
             </Text>
             {(item.rating ?? 0) > 0 && (
-              <View className='flex-row items-center'>
-                <Text className='text-xs text-orange-500 mr-1'>★</Text>
-                <Text className='text-xs text-gray-600'>{item.rating}</Text>
+              <View className="flex-row items-center">
+                <Text className="text-xs text-orange-500 mr-1">★</Text>
+                <Text className="text-xs text-gray-600">{item.rating}</Text>
               </View>
             )}
           </View>
@@ -741,10 +741,10 @@ export default function ExploreNavigateScreen() {
   );
 
   return (
-    <SafeAreaView className='flex-1 bg-white' edges={["top"]}>
-      <StatusBar barStyle='dark-content' backgroundColor='white' />
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
       {/* Map Container */}
-      <View className='flex-1' style={styles.mapContainer}>
+      <View className="flex-1" style={styles.mapContainer}>
         <MapView
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
@@ -758,7 +758,7 @@ export default function ExploreNavigateScreen() {
           showsBuildings={true}
           showsTraffic={false}
           loadingEnabled={true}
-          mapType='standard'
+          mapType="standard"
           onPress={() => setIsSearching(false)}
         >
           {/* Location Markers with Custom Images */}
@@ -809,37 +809,37 @@ export default function ExploreNavigateScreen() {
             <Polyline
               coordinates={routeCoordinates}
               strokeWidth={6}
-              strokeColor='#22c55e'
-              lineJoin='round'
-              lineCap='round'
+              strokeColor="#22c55e"
+              lineJoin="round"
+              lineCap="round"
             />
           )}
         </MapView>
 
         {/* Header - Transparent overlay on top of map */}
         <View style={styles.headerOverlay}>
-          <View className='flex-row items-center justify-between mb-4'>
+          <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity
               onPress={() => router.back()}
-              className='w-8 h-8 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]'
+              className="w-8 h-8 bg-white/40 rounded-full items-center justify-center p-2 border border-[#E6E6E6]"
             >
-              <ChevronLeft size={24} color='#1F2937' />
+              <ChevronLeft size={24} color="#1F2937" />
             </TouchableOpacity>
-            <Text className='text-gray-900 text-xl font-semibold'>
+            <Text className="text-gray-900 text-xl font-semibold">
               <TranslatedText>Navigate</TranslatedText>
             </Text>
-            <TouchableOpacity className='p-2  rounded-full shadow-md'>
+            <TouchableOpacity className="p-2  rounded-full shadow-md">
               {/* <Menu size={24} color="#1f2937" /> */}
             </TouchableOpacity>
           </View>
 
           {/* Search Bar */}
-          <View className='bg-white rounded-base flex-row items-center px-3 py-2 shadow-sm border border-gray-200'>
-            <Search size={20} color='#666' />
+          <View className="bg-white rounded-base flex-row items-center px-3 py-2 shadow-sm border border-gray-200">
+            <Search size={20} color="#666" />
             <TextInput
-              className='flex-1 ml-3 text-black'
-              placeholder='Search destinations...'
-              placeholderTextColor='#999'
+              className="flex-1 ml-3 text-black"
+              placeholder="Search destinations..."
+              placeholderTextColor="#999"
               value={searchQuery}
               onChangeText={setSearchQuery}
               onFocus={() => setIsSearching(true)}
@@ -847,7 +847,7 @@ export default function ExploreNavigateScreen() {
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <X size={20} color='#666' />
+                <X size={20} color="#666" />
               </TouchableOpacity>
             )}
           </View>
@@ -862,8 +862,8 @@ export default function ExploreNavigateScreen() {
               renderItem={renderLocationItem}
               showsVerticalScrollIndicator={false}
               ListEmptyComponent={
-                <View className='p-4'>
-                  <Text className='text-gray-500 text-center'>
+                <View className="p-4">
+                  <Text className="text-gray-500 text-center">
                     <TranslatedText>No locations found</TranslatedText>
                   </Text>
                 </View>
@@ -876,42 +876,42 @@ export default function ExploreNavigateScreen() {
         <View style={styles.mapControls}>
           <TouchableOpacity
             onPress={handleMyLocation}
-            className='bg-white p-3 rounded-full shadow-lg border border-gray-200 mb-3'
+            className="bg-white p-3 rounded-full shadow-lg border border-gray-200 mb-3"
             style={styles.controlButton}
             disabled={isAnimating}
           >
-            <Locate size={20} color='#22c55e' />
+            <Locate size={20} color="#22c55e" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleResetView}
-            className='bg-white p-3 rounded-full shadow-lg border border-gray-200'
+            className="bg-white p-3 rounded-full shadow-lg border border-gray-200"
             style={styles.controlButton}
             disabled={isAnimating}
           >
-            <RotateCcw size={20} color='#22c55e' />
+            <RotateCcw size={20} color="#22c55e" />
           </TouchableOpacity>
         </View>
 
         {/* Navigation Status */}
         {isNavigating && (
           <View style={styles.navigationStatus}>
-            <View className='bg-green-500 rounded-lg p-3 flex-row items-center justify-between shadow-lg'>
-              <View className='flex-row items-center flex-1'>
-                <Route size={16} color='white' />
-                <View className='ml-2'>
-                  <Text className='text-white font-semibold text-sm'>
+            <View className="bg-green-500 rounded-lg p-3 flex-row items-center justify-between shadow-lg">
+              <View className="flex-row items-center flex-1">
+                <Route size={16} color="white" />
+                <View className="ml-2">
+                  <Text className="text-white font-semibold text-sm">
                     Navigating to {destinationLocation?.name}
                   </Text>
-                  <Text className='text-green-100 text-xs'>
+                  <Text className="text-green-100 text-xs">
                     {navigationDistance} • {navigationDuration}
                   </Text>
                 </View>
               </View>
               <TouchableOpacity
                 onPress={handleStopNavigation}
-                className='bg-green-600 rounded p-2 ml-2'
+                className="bg-green-600 rounded p-2 ml-2"
               >
-                <X size={16} color='white' />
+                <X size={16} color="white" />
               </TouchableOpacity>
             </View>
           </View>
@@ -919,14 +919,14 @@ export default function ExploreNavigateScreen() {
 
         {/* Bottom Navigation Card - Matching the image design */}
         <View style={styles.bottomCard}>
-          <View className='bg-white rounded-t-3xl px-5 pt-5 pb-8 shadow-2xl'>
+          <View className="bg-white rounded-t-3xl px-5 pt-5 pb-8 shadow-2xl">
             {/* Current Location with orange pin */}
-            <View className='flex-row items-center mb-4 p-3 bg-gray-50 rounded-lg'>
-              <View className='bg-orange-500 p-2 rounded-full mr-3'>
-                <MapPin size={16} color='white' />
+            <View className="flex-row items-center mb-4 p-3 bg-gray-50 rounded-lg">
+              <View className="bg-orange-500 p-2 rounded-full mr-3">
+                <MapPin size={16} color="white" />
               </View>
               <Text
-                className='flex-1 text-gray-900 font-medium'
+                className="flex-1 text-gray-900 font-medium"
                 numberOfLines={1}
               >
                 {currentAddress}
@@ -936,23 +936,23 @@ export default function ExploreNavigateScreen() {
             {/* Destination with green pin */}
             <TouchableOpacity
               onPress={() => setIsSearching(true)}
-              className='flex-row items-center mb-6 p-3 border border-gray-200 rounded-lg'
+              className="flex-row items-center mb-6 p-3 border border-gray-200 rounded-lg"
             >
-              <View className='bg-green-500 p-2 rounded-full mr-3'>
-                <MapPin size={16} color='white' />
+              <View className="bg-green-500 p-2 rounded-full mr-3">
+                <MapPin size={16} color="white" />
               </View>
-              <View className='flex-1'>
+              <View className="flex-1">
                 {destinationLocation ? (
-                  <Text className='text-gray-900 font-medium' numberOfLines={1}>
+                  <Text className="text-gray-900 font-medium" numberOfLines={1}>
                     {destinationLocation.name || destinationLocation.title}
                   </Text>
                 ) : (
-                  <Text className='text-gray-500'>
+                  <Text className="text-gray-500">
                     <TranslatedText>Destination</TranslatedText>
                   </Text>
                 )}
               </View>
-              <ArrowUpRight size={20} color='#666' />
+              <ArrowUpRight size={20} color="#666" />
             </TouchableOpacity>
 
             {/* Set Direction Button */}
@@ -966,8 +966,8 @@ export default function ExploreNavigateScreen() {
               }`}
               style={styles.setDirectionButton}
             >
-              <Navigation2 size={20} color='white' />
-              <Text className='text-white font-semibold text-base ml-2'>
+              <Navigation2 size={20} color="white" />
+              <Text className="text-white font-semibold text-base ml-2">
                 <TranslatedText>Set Direction</TranslatedText>
               </Text>
             </TouchableOpacity>
@@ -998,6 +998,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     fontSize: 16,
+    paddingVertical: 12,
   },
   searchResults: {
     position: "absolute",

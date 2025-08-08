@@ -1,6 +1,13 @@
 // app/(auth)/reset-password.tsx
 import { useState } from "react";
-import { View, Text, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -71,96 +78,111 @@ export default function ResetPasswordScreen() {
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
   return (
-    <SafeAreaView className='flex-1 bg-surface'>
+    <SafeAreaView className="flex-1 bg-surface">
       <AnimatedHeader
         title={t("Reset Password")}
-        titleClassName='text-black text-2xl font-semibold text-center leading-8'
+        titleClassName="text-black text-2xl font-semibold text-center leading-8"
         showBackButton={true}
       />
 
-      <View className='flex-1 px-5' style={{ marginTop: SCREEN_HEIGHT * 0.25 }}>
-        {/* Content */}
-        <View className='flex-1'>
-          <Text className='text-center text-primary-dark text-xl font-semibold mb-8'>
-            <TranslatedText>Create Your New password</TranslatedText>
-          </Text>
-
-          <Controller
-            control={control}
-            name='password'
-            render={({ field: { onChange, value } }) => (
-              <View>
-                <Input
-                  label={t("New Password")}
-                  placeholder={t("Enter your Password")}
-                  value={value}
-                  onChangeText={(text) => {
-                    const textWithoutSpaces = text.replace(/\s/g, "");
-                    onChange(textWithoutSpaces);
-                    trigger("password");
-                  }}
-                  restrictInput='password'
-                  secureTextEntry
-                  error={
-                    errors.password?.message
-                      ? t(errors.password.message)
-                      : undefined
-                  }
-                  maxLength={128}
-                  icon={<Lock size={20} color='#4DBA28' />}
-                  iconPosition='left'
-                  className='mb-4'
-                />
-                <PasswordStrengthIndicator password={value} />
-              </View>
-            )}
-          />
-
-          <Controller
-            control={control}
-            name='confirmPassword'
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label={t("Re-type password")}
-                placeholder={t("Enter Re-Password")}
-                value={value}
-                onChangeText={(text) => {
-                  const textWithoutSpaces = text.replace(/\s/g, "");
-                  onChange(textWithoutSpaces);
-                  trigger("confirmPassword");
-                }}
-                secureTextEntry
-                error={
-                  errors.confirmPassword?.message
-                    ? t(errors.confirmPassword.message)
-                    : undefined
-                }
-                maxLength={128}
-                icon={<Lock size={20} color='#4DBA28' />}
-                iconPosition='left'
-              />
-            )}
-          />
-        </View>
-
-        {/* Bottom Button */}
-        <View className='pb-8'>
-          <Button
-            onPress={handleSubmit(onSubmit)}
-            loading={isLoading}
-            className='w-full'
-            size='md'
-            textClassName='!text-black'
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View
+            className="bg-surface/90 rounded-t-lg p-5"
+            style={{ marginTop: SCREEN_HEIGHT * 0.25 }}
           >
-            <TranslatedText>Create Now</TranslatedText>
-          </Button>
-        </View>
-        <SuccessModal
-          visible={showSuccessModal}
-          title={t("Your password has been reset successfully.")}
-          onClose={handleSuccessClose}
-        />
-      </View>
+            {/* Content */}
+            <View className="flex-1">
+              <Text className="text-center text-primary-dark text-xl font-semibold mb-8">
+                <TranslatedText>Create Your New password</TranslatedText>
+              </Text>
+
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, value } }) => (
+                  <View>
+                    <Input
+                      label={t("New Password")}
+                      placeholder={t("Enter your Password")}
+                      value={value}
+                      onChangeText={(text) => {
+                        const textWithoutSpaces = text.replace(/\s/g, "");
+                        onChange(textWithoutSpaces);
+                        trigger("password");
+                      }}
+                      restrictInput="password"
+                      secureTextEntry
+                      error={
+                        errors.password?.message
+                          ? t(errors.password.message)
+                          : undefined
+                      }
+                      maxLength={128}
+                      icon={<Lock size={20} color="#4DBA28" />}
+                      iconPosition="left"
+                      className="mb-4"
+                    />
+                    <PasswordStrengthIndicator password={value} />
+                  </View>
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label={t("Re-type password")}
+                    placeholder={t("Enter Re-Password")}
+                    value={value}
+                    onChangeText={(text) => {
+                      const textWithoutSpaces = text.replace(/\s/g, "");
+                      onChange(textWithoutSpaces);
+                      trigger("confirmPassword");
+                    }}
+                    secureTextEntry
+                    error={
+                      errors.confirmPassword?.message
+                        ? t(errors.confirmPassword.message)
+                        : undefined
+                    }
+                    maxLength={128}
+                    icon={<Lock size={20} color="#4DBA28" />}
+                    iconPosition="left"
+                  />
+                )}
+              />
+            </View>
+
+            {/* Bottom Button */}
+            <View className="pb-8">
+              <Button
+                onPress={handleSubmit(onSubmit)}
+                loading={isLoading}
+                className="w-full"
+                size="md"
+                textClassName="!text-black"
+              >
+                <TranslatedText>Create Now</TranslatedText>
+              </Button>
+            </View>
+            <SuccessModal
+              visible={showSuccessModal}
+              title={t("Your password has been reset successfully.")}
+              onClose={handleSuccessClose}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

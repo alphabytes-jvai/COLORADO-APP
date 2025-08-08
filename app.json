@@ -6,16 +6,14 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "descubrelo-colorado",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.descubrelocolorado.app",
@@ -25,7 +23,8 @@
       },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show your position on the map and provide directions to nearby places.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show your position on the map and provide directions to nearby places."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show your position on the map and provide directions to nearby places.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -41,6 +40,11 @@
         }
       },
       "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "FOREGROUND_SERVICE",
@@ -79,6 +83,12 @@
       "eas": {
         "projectId": "cd2df8f9-de13-489d-884d-c253ca64f865"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/cd2df8f9-de13-489d-884d-c253ca64f865"
     }
   }
 }

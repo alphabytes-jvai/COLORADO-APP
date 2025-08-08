@@ -8,6 +8,9 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -268,82 +271,102 @@ export default function VerifyOTPScreen() {
         showBackButton={true}
       />
 
-      <View className="flex-1 px-5" style={{ marginTop: SCREEN_HEIGHT * 0.25 }}>
-        {/* Content */}
-        <View className="flex-1">
-          {/* Description */}
-          <Text className="text-black text-base leading-6 mb-8 text-center">
-            <TranslatedText>
-              We sent a 4 digit code to your email
-            </TranslatedText>
-            {"\n"}
-            <Text className="text-primary-dark font-medium">
-              {currentEmail}
-            </Text>
-          </Text>
-
-          {/* OTP Input */}
-          <View className="flex-row justify-between mb-8 mt-8">
-            {otp.map((digit, index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => {
-                  inputRefs.current[index] = ref;
-                }}
-                value={digit}
-                onChangeText={(value) => handleOtpChange(value, index)}
-                onKeyPress={({ nativeEvent }) =>
-                  handleKeyPress(nativeEvent.key, index)
-                }
-                className={`w-16 h-16 border-2 rounded-lg text-center text-2xl font-bold bg-white ${
-                  digit
-                    ? "border-primary"
-                    : otp.some((d) => d !== "") && !digit
-                      ? "border-red-300"
-                      : "border-gray-300"
-                }`}
-                maxLength={1}
-                keyboardType="numeric"
-                autoFocus={index === 0}
-                placeholderTextColor="#999"
-              />
-            ))}
-          </View>
-
-          {/* Resend Timer */}
-          <View className="items-center mb-8">
-            <Text className="text-black text-base mb-2">
-              <TranslatedText>
-                Didn&apos;t get the verification code?
-              </TranslatedText>
-            </Text>
-            {canResend ? (
-              <TouchableOpacity onPress={handleResendOTP} disabled={isLoading}>
-                <Text className="text-primary-dark font-medium text-base">
-                  <TranslatedText>Resend code</TranslatedText>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 25}
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            paddingTop: SCREEN_HEIGHT * 0.25,
+            paddingBottom: 50,
+          }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="flex-1 px-5">
+            {/* Content */}
+            <View className="flex-1">
+              {/* Description */}
+              <Text className="text-black text-base leading-6 mb-8 text-center">
+                <TranslatedText>
+                  We sent a 4 digit code to your email
+                </TranslatedText>
+                {"\n"}
+                <Text className="text-primary-dark font-medium">
+                  {currentEmail}
                 </Text>
-              </TouchableOpacity>
-            ) : (
-              <Text className="text-primary-dark text-base">
-                <TranslatedText>Resend in</TranslatedText> {formatTime(timer)}
               </Text>
-            )}
-          </View>
-        </View>
 
-        {/* Bottom Button */}
-        <View className="pb-8">
-          <Button
-            onPress={handleVerifyOTP}
-            loading={isLoading}
-            className="w-full"
-            size="md"
-            textClassName="!text-black"
-          >
-            <TranslatedText>Verify Email</TranslatedText>
-          </Button>
-        </View>
-      </View>
+              {/* OTP Input */}
+              <View className="flex-row justify-between mb-5">
+                {otp.map((digit, index) => (
+                  <TextInput
+                    key={index}
+                    ref={(ref) => {
+                      inputRefs.current[index] = ref;
+                    }}
+                    value={digit}
+                    onChangeText={(value) => handleOtpChange(value, index)}
+                    onKeyPress={({ nativeEvent }) =>
+                      handleKeyPress(nativeEvent.key, index)
+                    }
+                    className={`w-16 h-16 border-2 rounded-lg text-center text-2xl font-bold bg-white ${
+                      digit
+                        ? "border-primary"
+                        : otp.some((d) => d !== "") && !digit
+                          ? "border-red-300"
+                          : "border-gray-300"
+                    }`}
+                    maxLength={1}
+                    keyboardType="numeric"
+                    autoFocus={index === 0}
+                    placeholderTextColor="#999"
+                  />
+                ))}
+              </View>
+
+              {/* Resend Timer */}
+              <View className="items-center mb-5">
+                <Text className="text-black text-base mb-2">
+                  <TranslatedText>
+                    Didn&apos;t get the verification code?
+                  </TranslatedText>
+                </Text>
+                {canResend ? (
+                  <TouchableOpacity
+                    onPress={handleResendOTP}
+                    disabled={isLoading}
+                  >
+                    <Text className="text-primary-dark font-medium text-base">
+                      <TranslatedText>Resend code</TranslatedText>
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <Text className="text-primary-dark text-base">
+                    <TranslatedText>Resend in</TranslatedText>{" "}
+                    {formatTime(timer)}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* Bottom Button */}
+            <View className="pb-8">
+              <Button
+                onPress={handleVerifyOTP}
+                loading={isLoading}
+                className="w-full"
+                size="md"
+                textClassName="!text-black"
+              >
+                <TranslatedText>Verify Email</TranslatedText>
+              </Button>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

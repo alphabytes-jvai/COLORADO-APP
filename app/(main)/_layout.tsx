@@ -8,7 +8,7 @@ import {
   Star,
   House,
 } from "lucide-react-native";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Platform } from "react-native";
 
 export default function MainLayout() {
   const colorScheme = useColorScheme();
@@ -61,28 +61,28 @@ export default function MainLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].background,
-          height: 95,
-          paddingBottom: 8,
-          paddingTop: 20,
+          height: Platform.OS === "ios" ? 70 : 95,
+          paddingBottom: Platform.OS === "ios" ? 20 : 8,
+          paddingTop: Platform.OS === "ios" ? 0 : 20,
           borderTopWidth: 0,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: "500",
+          fontWeight: "500" as const,
         },
         tabBarItemStyle: {
-          justifyContent: "center",
-          alignItems: "center",
+          justifyContent: "center" as const,
+          alignItems: "center" as const,
         },
         tabBarIconStyle: {
-          marginBottom: 4,
+          marginBottom: 5,
         },
         // Use custom tab button to remove press effects
         tabBarButton: CustomTabButton,
       })}
     >
       <Tabs.Screen
-        name='home'
+        name="home"
         options={{
           title: "Home",
           tabBarIcon: ({ color, size, focused }) => (
@@ -91,7 +91,7 @@ export default function MainLayout() {
         }}
       />
       <Tabs.Screen
-        name='ask-ai'
+        name="ask-ai"
         options={{
           title: "Ask AI",
           tabBarIcon: ({ color, size, focused }) => (
@@ -105,7 +105,7 @@ export default function MainLayout() {
         }}
       />
       <Tabs.Screen
-        name='map'
+        name="map"
         options={{
           title: "Map",
           tabBarIcon: ({ color, size, focused }) => (
@@ -119,7 +119,7 @@ export default function MainLayout() {
         }}
       />
       <Tabs.Screen
-        name='favorites'
+        name="favorites"
         options={{
           title: "Favorite",
           tabBarIcon: ({ color, size, focused }) => (
@@ -128,7 +128,7 @@ export default function MainLayout() {
         }}
       />
       <Tabs.Screen
-        name='settings'
+        name="settings"
         options={{
           title: "Settings",
           tabBarIcon: ({ color, size, focused }) => (
@@ -144,25 +144,25 @@ export default function MainLayout() {
 
       {/* Hidden screens */}
       <Tabs.Screen
-        name='recommendations'
+        name="recommendations"
         options={{
           href: null,
         }}
       />
       <Tabs.Screen
-        name='explore'
+        name="explore"
         options={{
           href: null,
         }}
       />
       <Tabs.Screen
-        name='detail/[id]'
+        name="detail/[id]"
         options={{
           href: null,
         }}
       />
       <Tabs.Screen
-        name='profile'
+        name="profile"
         options={{
           href: null,
         }}

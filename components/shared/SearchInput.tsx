@@ -8,7 +8,7 @@ interface SearchInputProps {
   onChangeText?: (text: string) => void;
   onPress?: () => void;
   className?: string;
-  iconShow?: boolean
+  iconShow?: boolean;
 }
 
 export function SearchInput({
@@ -35,14 +35,15 @@ export function SearchInput({
     >
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor='#9CA3AF'
+        placeholderTextColor="#9CA3AF"
         value={value}
         onChangeText={onChangeText}
         editable={!onPress}
         pointerEvents={onPress ? "none" : "auto"}
-        className='flex-1 ml-2 text-gray-800'
+        className="flex-1 ml-2 text-gray-800"
+        style={{ paddingVertical: 12 }}
       />
-      {iconShow && <Search size={20} color='#4DBA28' />}
+      {iconShow && <Search size={20} color="#4DBA28" />}
     </TouchableOpacity>
   );
 }

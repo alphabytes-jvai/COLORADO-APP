@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import { clsx } from "clsx";
@@ -120,9 +121,7 @@ export function Input({
           ]}
         >
           {icon && iconPosition === "left" && (
-            <View className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
-              {icon}
-            </View>
+            <View style={styles.leftIcon}>{icon}</View>
           )}
 
           <TextInput
@@ -139,7 +138,7 @@ export function Input({
             onBlur={() => setIsFocused(false)}
             maxLength={maxLength}
             className={clsx(
-              "w-full py-3 text-base text-primary-dark",
+              "w-full text-base text-primary-dark",
               inputClassName
             )}
             style={[
@@ -152,19 +151,19 @@ export function Input({
           />
 
           {icon && iconPosition === "right" && (
-            <View className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
-              {icon}
-            </View>
+            <View style={styles.rightIcon}>{icon}</View>
           )}
         </View>
 
         {secureTextEntry && (
           <TouchableOpacity
             onPress={handleTogglePassword}
-            className="absolute top-1/2 -translate-y-1/2 z-20"
-            style={{
-              right: icon && iconPosition === "right" ? 48 : 12,
-            }}
+            style={[
+              styles.passwordToggle,
+              {
+                right: icon && iconPosition === "right" ? 48 : 12,
+              },
+            ]}
           >
             {showPassword ? (
               <EyeOff size={20} color="#9CA3AF" />
@@ -192,9 +191,44 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 48,
   },
   input: {
     backgroundColor: "transparent",
     borderWidth: 0,
+    flex: 1,
+    paddingVertical: Platform.OS === "ios" ? 12 : 12,
+    fontSize: 16,
+    lineHeight: Platform.OS === "ios" ? 20 : undefined,
+    textAlignVertical: "center",
+  },
+  leftIcon: {
+    position: "absolute",
+    left: 12,
+    top: "50%",
+    transform: [{ translateY: -10 }],
+    zIndex: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  rightIcon: {
+    position: "absolute",
+    right: 12,
+    top: "50%",
+    transform: [{ translateY: -10 }],
+    zIndex: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  passwordToggle: {
+    position: "absolute",
+    top: "50%",
+    transform: [{ translateY: -10 }],
+    zIndex: 20,
+    padding: 4,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

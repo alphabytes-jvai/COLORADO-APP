@@ -1,6 +1,13 @@
 // app/(auth)/forgot-password.tsx
 import { useState } from "react";
-import { View, Text, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -70,49 +77,68 @@ export default function ForgotPasswordScreen() {
         showBackButton={true}
       />
 
-      <View className="flex-1 px-5" style={{ marginTop: SCREEN_HEIGHT * 0.32 }}>
-        {/* Content */}
-        <View className="flex-1">
-          <Text className="text-center text-black text-base leading-6 mb-5">
-            <TranslatedText>
-              Select which contact details should we use to reset your password.
-            </TranslatedText>
-          </Text>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            paddingTop: SCREEN_HEIGHT * 0.32,
+            paddingBottom: 50,
+          }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="flex-1 p-5">
+            {/* Content */}
+            <View className="flex-1">
+              <Text className="text-center text-black text-base leading-6 mb-5">
+                <TranslatedText>
+                  Select which contact details should we use to reset your
+                  password.
+                </TranslatedText>
+              </Text>
 
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label={t("Email")}
-                placeholder={t("example@gmail.com")}
-                value={value}
-                onChangeText={onChange}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                error={
-                  errors.email?.message ? t(errors.email.message) : undefined
-                }
-                icon={<Mail size={20} color="#4DBA28" />}
-                iconPosition="left"
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label={t("Email")}
+                    placeholder={t("example@gmail.com")}
+                    value={value}
+                    onChangeText={onChange}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    error={
+                      errors.email?.message
+                        ? t(errors.email.message)
+                        : undefined
+                    }
+                    icon={<Mail size={20} color="#4DBA28" />}
+                    iconPosition="left"
+                  />
+                )}
               />
-            )}
-          />
-        </View>
+            </View>
 
-        {/* Bottom Button */}
-        <View className="pb-8">
-          <Button
-            onPress={handleSubmit(onSubmit)}
-            loading={isLoading}
-            className="w-full"
-            size="md"
-            textClassName="!text-black"
-          >
-            <TranslatedText>Continue</TranslatedText>
-          </Button>
-        </View>
-      </View>
+            {/* Bottom Button */}
+            <View className="pb-8">
+              <Button
+                onPress={handleSubmit(onSubmit)}
+                loading={isLoading}
+                className="w-full"
+                size="md"
+                textClassName="!text-black"
+              >
+                <TranslatedText>Continue</TranslatedText>
+              </Button>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

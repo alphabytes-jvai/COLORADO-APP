@@ -11,6 +11,7 @@ import {
   ImageBackground,
   Image,
   Modal,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -308,11 +309,11 @@ export default function HomeScreen() {
         </ScrollView>
       </SafeAreaView>
 
-      {/* Search Screen Modal */}
+      {/* Search Screen Modal - Fixed for iOS */}
       <Modal
         visible={showSearchScreen}
         animationType="slide"
-        presentationStyle="fullScreen"
+        presentationStyle={Platform.OS === "ios" ? "pageSheet" : "fullScreen"}
         onRequestClose={handleCloseSearchScreen}
       >
         <SearchScreen
